@@ -1,0 +1,63 @@
+/* Bootstrap 3 (WAJIB PERTAMA) */
+@import "bootstrap/dist/css/bootstrap.min.css";
+
+/* Font Awesome */
+@import "font-awesome/css/font-awesome.min.css";
+
+/* AdminLTE Core */
+@import "admin-lte/dist/css/AdminLTE.min.css";
+
+/* AdminLTE Skins */
+@import "admin-lte/dist/css/skins/_all-skins.min.css";
+
+
+.content-wrapper {
+  min-height: calc(100vh - 50px);
+}
+
+.wrapper {
+  overflow-x: hidden;
+}
+
+/* Branding Kampus */
+.sidebar-menu>li.active>a {
+  background-color: #1e88e5 !important;
+  color: #fff !important;
+}
+
+.navbar-brand {
+  color: #fff !important;
+}
+
+.user-panel>.info>p {
+  color: #fff;
+}
+
+/* Sidebar menu font lebih kecil & rapi */
+.sidebar-menu>li>a {
+  font-size: 12.5px;
+  /* default ~14px */
+  padding: 10px 15px;
+}
+
+.sidebar-menu .header {
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+
+/* Menu aktif: teks putih, tanpa background */
+.sidebar-menu>li.active>a {
+  background: transparent !important;
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+/* Icon ikut putih */
+.sidebar-menu>li.active>a>i {
+  color: #ffffff !important;
+}
+
+/* Hover tetap normal */
+.sidebar-menu>li>a:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
