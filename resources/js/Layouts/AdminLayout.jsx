@@ -146,6 +146,20 @@ export default function AdminLayout({ title, children }) {
                 <span>Device</span>
               </a>
             </li>
+
+            <li className={url.startsWith('/unit') ? 'active' : ''}>
+              <a href="/unit">
+                <i className="fa fa-building"></i> <span>Unit</span>
+              </a>
+            </li>
+
+            <li className={url.startsWith('/subunit') ? 'active' : ''}>
+              <a href="/subunit">
+                <i className="fa fa-sitemap"></i> <span>Sub Unit</span>
+              </a>
+            </li>
+
+
           </ul>
 
 

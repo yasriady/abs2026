@@ -25,5 +25,17 @@ class DatabaseSeeder extends Seeder
         $this->call([
             MahasiswaSeeder::class,
         ]);
+
+        $this->call([
+            UnitCsvSeeder::class,
+        ]);
+
+        $this->call([
+            AdminUserSeeder::class,
+        ]);
+
+        $this->call([
+            SubUnitCsvSeeder::class,
+        ]);
     }
 }
