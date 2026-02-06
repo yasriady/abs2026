@@ -1,10 +1,16 @@
 import AdminLayout from '../../Layouts/AdminLayout'
 import { useForm, router } from '@inertiajs/react'
 import { useState } from 'react'
+import ConfirmDeleteModal from '@/Components/ConfirmDeleteModal'
 
 export default function Index({ units, filters }) {
   const [modal, setModal] = useState(false)
   const [edit, setEdit] = useState(null)
+
+  // // DELETE MODAL STATE
+  // const [deleteModal, setDeleteModal] = useState(false)
+  // const [deleteItem, setDeleteItem] = useState(null)
+  const [deleteUnit, setDeleteUnit] = useState(null)
 
   const { data, setData, post, put, reset, errors } = useForm({
     unit: '',
@@ -92,16 +98,11 @@ export default function Index({ units, filters }) {
                     </button>
                     <button
                       className="btn btn-xs btn-danger"
-                      onClick={() => {
-                        if (confirm('Yakin hapus unit ini?')) {
-                          router.delete(`/unit/${u.id}`, {
-                            preserveScroll: true,
-                          })
-                        }
-                      }}
+                      onClick={() => setDeleteUnit(u)}
                     >
                       Hapus
                     </button>
+
                   </td>
                 </tr>
               ))}
@@ -122,41 +123,27 @@ export default function Index({ units, filters }) {
         </div>
       </div>
 
-      {/* MODAL */}
-      {modal && (
-        <div className="modal fade in" style={{ display: 'block' }}>
-          <div className="modal-dialog">
-            <form className="modal-content" onSubmit={submit}>
-              <div className="modal-header">
-                <h4>{edit ? 'Edit' : 'Tambah'} Unit</h4>
-              </div>
+      <ConfirmDeleteModal
+        show={!!deleteUnit}
+        title="Konfirmasi Hapus Unit"
+        message={
+          <p>
+            Yakin menghapus Unit:
+            <strong> {deleteUnit?.unit}</strong>?
+          </p>
+        }
+        onCancel={() => setDeleteUnit(null)}
+        onConfirm={() => {
+          router.delete(`/unit/${deleteUnit.id}`, {
+            preserveScroll: true,
+            onSuccess: () => setDeleteUnit(null),
+          })
+        }}
+      />
 
-              <div className="modal-body">
-                <input
-                  className="form-control"
-                  placeholder="Nama Unit"
-                  value={data.unit}
-                  onChange={e => setData('unit', e.target.value)}
-                />
-                {errors.unit && <div className="text-danger">{errors.unit}</div>}
-              </div>
 
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-default"
-                  onClick={closeModal}
-                >
-                  Batal
-                </button>
-                <button className="btn btn-primary">
-                  Simpan
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+
+
     </AdminLayout>
   )
 }

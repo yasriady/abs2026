@@ -22,12 +22,16 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
 
-        $this->call([
-            MahasiswaSeeder::class,
-        ]);
+        // $this->call([
+        //     MahasiswaSeeder::class,
+        // ]);
 
         $this->call([
             UnitCsvSeeder::class,
+        ]);
+
+        $this->call([
+            SubUnitCsvSeeder::class,
         ]);
 
         $this->call([
@@ -35,7 +39,39 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call([
-            SubUnitCsvSeeder::class,
+            AdminUnitElgusfitriSeeder::class,
+        ]);
+
+        $this->call([
+            DeviceCsvSeeder::class,
+        ]);
+
+        $this->call([
+            HariLiburNasionalSeeder::class,
+        ]);
+
+        $this->call([
+            PegawaiCsvSeeder::class,
+        ]);
+
+        $this->call([
+            RolePermissionSeeder::class,
+        ]);
+
+        $this->call([
+            RolePermissionSeeder::class,
+            UserSeeder::class,
+        ]);
+
+        $this->call([
+            JadwalDinasSeeder::class,
+            JadwalUnitSeeder::class,
+            JadwalSubUnitSeeder::class,
+            JadwalPegawaiSeeder::class,
+            // 
+            JadwalDinasRamadhanSeeder::class,
+            JadwalUnitRamadhanSeeder::class,
+
         ]);
     }
 }

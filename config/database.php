@@ -113,6 +113,22 @@ return [
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
 
+
+        // Koneksi untuk database attendance (server lain)
+        'devel_db' => [
+            'driver' => 'mysql',
+            'host' => env('DB_ATT_HOST', '192.168.1.100'), // IP/domain server lain
+            'port' => env('DB_ATT_PORT', '3306'),
+            'database' => env('DB_ATT_DATABASE', 'attendance_db'),
+            'username' => env('DB_ATT_USERNAME', 'attendance_user'),
+            'password' => env('DB_ATT_PASSWORD', 'password123'),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => true,
+            'engine' => null,
+        ],
+
     ],
 
     /*
@@ -148,7 +164,7 @@ return [
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
-            'prefix' => env('REDIS_PREFIX', Str::slug((string) env('APP_NAME', 'laravel')).'-database-'),
+            'prefix' => env('REDIS_PREFIX', Str::slug((string) env('APP_NAME', 'laravel')) . '-database-'),
             'persistent' => env('REDIS_PERSISTENT', false),
         ],
 

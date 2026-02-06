@@ -8,6 +8,7 @@ import { router } from '@inertiajs/react'
 
 export default function AdminLayout({ title, children }) {
   const { url } = usePage()
+  const { auth } = usePage().props
 
   useEffect(() => {
     const fixLayout = () => {
@@ -49,7 +50,12 @@ export default function AdminLayout({ title, children }) {
               <img src={brand.avatar} className="img-circle" alt="Campus Logo" />
             </div>
             <div className="pull-left info">
-              <p>{brand.campusName}</p>
+              {/* <p>{brand.campusName}</p> */}
+
+              <p className="hidden-xs">
+                {auth.user?.name || 'Guest'}
+              </p>
+
               <div
                 style={{
                   display: 'flex',
@@ -58,7 +64,7 @@ export default function AdminLayout({ title, children }) {
                   fontSize: '12px',
                 }}
               >
-                <span>Online</span>
+                <span>{auth.user?.role || 'User'}&nbsp;</span>
                 <a
                   href="#"
                   onClick={(e) => {
@@ -70,7 +76,7 @@ export default function AdminLayout({ title, children }) {
                     textDecoration: 'none',
                   }}
                 >
-                  logout
+                  [logout]
                 </a>
               </div>
 
@@ -113,6 +119,13 @@ export default function AdminLayout({ title, children }) {
               <a href="/pegawai">
                 <i className="fa fa-users"></i>
                 <span>Pegawai</span>
+              </a>
+            </li>
+
+            <li>
+              <a href="/v1/pegawai">
+                <i className="fa fa-users"></i>
+                <span>Pegawai v1</span>
               </a>
             </li>
 

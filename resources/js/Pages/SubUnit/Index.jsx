@@ -1,10 +1,16 @@
 import AdminLayout from '../../Layouts/AdminLayout'
 import { useForm, router } from '@inertiajs/react'
 import { useState } from 'react'
+import ConfirmDeleteModal from '@/Components/ConfirmDeleteModal'
 
 export default function Index({ subUnits, units, filters }) {
   const [modal, setModal] = useState(false)
   const [edit, setEdit] = useState(null)
+
+  // // DELETE MODAL STATE
+  // const [deleteModal, setDeleteModal] = useState(false)
+  // const [deleteItem, setDeleteItem] = useState(null)
+  const [deleteSubUnit, setDeleteSubUnit] = useState(null)
 
   const { data, setData, post, put, reset, errors } = useForm({
     id: '',
@@ -100,16 +106,11 @@ export default function Index({ subUnits, units, filters }) {
                     </button>
                     <button
                       className="btn btn-xs btn-danger"
-                      onClick={() => {
-                        if (confirm('Yakin hapus sub unit ini?')) {
-                          router.delete(`/subunit/${s.id}`, {
-                            preserveScroll: true,
-                          })
-                        }
-                      }}
+                      onClick={() => setDeleteSubUnit(s)}
                     >
                       Hapus
                     </button>
+
                   </td>
                 </tr>
               ))}
@@ -130,7 +131,7 @@ export default function Index({ subUnits, units, filters }) {
         </div>
       </div>
 
-      {/* MODAL */}
+      {/* MODAL CREATE / EDIT */}
       {modal && (
         <div className="modal fade in" style={{ display: 'block' }}>
           <div className="modal-dialog">
@@ -189,6 +190,25 @@ export default function Index({ subUnits, units, filters }) {
           </div>
         </div>
       )}
+
+      <ConfirmDeleteModal
+        show={!!deleteSubUnit}
+        title="Konfirmasi Hapus SubUnit"
+        message={
+          <p>
+            Yakin menghapus Sub Unit:
+            <strong> {deleteSubUnit?.sub_unit}</strong>?
+          </p>
+        }
+        onCancel={() => setDeleteSubUnit(null)}
+        onConfirm={() => {
+          router.delete(`/subunit/${deleteSubUnit.id}`, {
+            preserveScroll: true,
+            onSuccess: () => setDeleteSubUnit(null),
+          })
+        }}
+      />
+
     </AdminLayout>
   )
 }
