@@ -1,19 +1,15 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Devel;
 
+use App\Http\Controllers\Controller;
 use App\Models\AbsensiRaw;
+use Illuminate\Container\Attributes\DB;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
-class DevelController extends Controller
+class DevelAbsensiRawController extends Controller
 {
-    public function coba()
-    {
-        return $this->coba_cepat();
-    }
-
-    public function coba_lambat()
+    public function absensiRaw_lambat()
     {
         // $pegawaiAktif = Pegawai::whereDate('begin_date', '<=', Carbon::today())
         //     ->whereDate('end_date', '>=', Carbon::today())
@@ -49,7 +45,7 @@ class DevelController extends Controller
         return $summary;
     }
 
-    public function coba_cepat()
+    public function absensiRaw_cepat()
     {
         $summary = AbsensiRaw::select(
             'nik',

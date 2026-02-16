@@ -65,6 +65,7 @@ export default function Index({ histories }) {
                                 <th>NIK</th>
                                 <th>Nama</th>
                                 <th>Status</th>
+                                <th>Unit</th>
                                 <th style={{ width: 140 }}>Begin Date</th>
                                 <th style={{ width: 140 }}>End Date</th>
                                 <th style={{ width: 120 }}>Aksi</th>
@@ -101,6 +102,7 @@ export default function Index({ histories }) {
                                         </td>
 
                                         <td>{row.status_kepegawaian}</td>
+                                        <td>{row.id_unit}</td>
 
                                         {/* BEGIN DATE */}
                                         <td

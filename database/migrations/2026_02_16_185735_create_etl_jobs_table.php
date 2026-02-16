@@ -1,0 +1,36 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('etl_jobs', function (Blueprint $table) {
+            $table->id();
+            $table->date('date');
+            $table->integer('unit_id')->nullable();
+            $table->string('status')->default('queued');
+            $table->timestamps();
+        });
+    }
+
+    // Nilai status adalah:
+    // queued
+    // running
+    // done
+    // failed
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('etl_jobs');
+    }
+};

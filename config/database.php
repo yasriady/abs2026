@@ -129,6 +129,19 @@ return [
             'engine' => null,
         ],
 
+        'TEMP' => [
+            'driver' => 'mysql',
+            'host' => env('DB_TEMP_HOST', '192.168.1.100'), // IP/domain server lain
+            'port' => env('DB_TEMP_PORT', '3306'),
+            'database' => env('DB_TEMP_DATABASE', 'attendance_db'),
+            'username' => env('DB_TEMP_USERNAME', 'attendance_user'),
+            'password' => env('DB_TEMP_PASSWORD', 'password123'),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => true,
+            'engine' => null,
+        ],
     ],
 
     /*

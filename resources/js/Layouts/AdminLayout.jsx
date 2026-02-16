@@ -5,6 +5,7 @@ import { Head, usePage } from '@inertiajs/react'
 import { useEffect } from 'react'
 import brand from '../brand'
 import { router } from '@inertiajs/react'
+import GlobalLoader from '@/Components/GlobalLoader'
 
 export default function AdminLayout({ title, children }) {
   const { url } = usePage()
@@ -206,6 +207,7 @@ export default function AdminLayout({ title, children }) {
         <strong>{brand.footerText}</strong>
       </footer>
 
+      {/* <GlobalLoader /> */}
 
     </div>
   )

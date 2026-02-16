@@ -1,6 +1,10 @@
 <?php
 
+use App\Http\Controllers\AbsensiHarianController;
 use App\Http\Controllers\Admin\PegawaiHistorisRawController;
+use App\Http\Controllers\Controller;
+use App\Http\Controllers\Devel\BaseDevelController;
+use App\Http\Controllers\Devel\ValidDeviceController;
 use App\Http\Controllers\DevelController;
 use App\Http\Controllers\MahasiswaController;
 use Illuminate\Support\Facades\Route;
@@ -15,6 +19,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\V1\PegawaiController as V1PegawaiController;
 use App\Http\Controllers\VerifikasiAbsensiController;
 use App\Http\Controllers\HarianController;
+use App\Http\Controllers\HarianControllerX;
+use App\Http\Controllers\PegawaiFotoController;
 
 require __DIR__ . '/auth.php';
 
@@ -60,10 +66,12 @@ Route::prefix('admin')->group(function () {
 // Route::get('/pegawai/foto/{nik}', [\App\Http\Controllers\PegawaiFotoController::class, 'show'])
 //     ->name('pegawai.foto')
 //     ->middleware('auth');
-Route::get('/pegawai/foto/{id}', [\App\Http\Controllers\PegawaiFotoController::class, 'show'])
+Route::get('/pegawai/foto/{id}', [PegawaiFotoController::class, 'show'])
     ->name('pegawai.foto')
     ->middleware('auth');
-
+Route::get('/absensi/foto/{inOut}/{sum_id}', [PegawaiFotoController::class, 'absensiFoto'])
+    ->name('absensi.foto.in')
+    ->middleware('auth');
 
 Route::middleware('auth')->group(function () {
 
@@ -206,16 +214,45 @@ Route::middleware('auth')->group(function () {
     Route::get('/', function () {
         return redirect()->route('dashboard');
     });
+
+
+    Route::get('/migrasi-pegawai', [PegawaiController::class, 'migrasiPegawai']);
+    Route::get('/migrasi-pegawai-fast', [PegawaiController::class, 'migrasiPegawaiFast']);
+    Route::get('/devel', [ValidDeviceController::class, 'index']);
+
+    // x_
+    Route::get('/absensi-harian', [HarianControllerX::class, 'index'])
+        ->name('absensi-harian.index');
+
+    // x_
+    Route::get('/absensi-harian-new', [AbsensiHarianController::class, 'index'])
+        ->name('absensi.harian-new');
+
+    Route::get('/absensi-harian', [AbsensiHarianController::class, 'index'])
+        ->name('absensi.harian');
+
+    /* ===============================
+        UPDATE STATUS HARIAN
+        =============================== */
+    Route::post(
+        '/absensi/update-status',
+        [AbsensiHarianController::class, 'updateStatus']
+    )->name('absensi.updateStatus');
+    // Route::post('/absensi/update-status', [AbsensiHarianController::class, 'updateStatus']);
+
+    /* ===============================
+       UPDATE JAM MASUK / PULANG
+    =============================== */
+    Route::post(
+        '/absensi/update-jam',
+        [AbsensiHarianController::class, 'updateJam']
+    )->name('absensi.updateJam');
+
+    Route::post('/absensi/regenerate', [AbsensiHarianController::class, 'regenerate'])
+        ->name('absensi.regenerate');
 });
 
 Route::middleware(['auth', 'permission:user.view'])->get('/user', [UserController::class, 'index']);
 Route::middleware(['auth', 'permission:user.create'])->post('/user', [UserController::class, 'store']);
 Route::middleware(['auth', 'permission:user.update'])->put('/user/{user}', [UserController::class, 'update']);
 Route::middleware(['auth', 'permission:user.delete'])->delete('/user/{user}', [UserController::class, 'destroy']);
-
-Route::get('/migrasi-pegawai', [PegawaiController::class, 'migrasiPegawai']);
-Route::get('/migrasi-pegawai-fast', [PegawaiController::class, 'migrasiPegawaiFast']);
-Route::get('/coba', [DevelController::class, 'coba']);
-
-Route::get('/absensi-harian', [HarianController::class, 'index'])
-    ->name('absensi-harian.index');

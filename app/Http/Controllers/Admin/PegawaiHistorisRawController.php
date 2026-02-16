@@ -15,9 +15,12 @@ class PegawaiHistorisRawController extends Controller
     {
         $histories = PegawaiHistorisRaw::query()
             ->with('masterPegawai')
+            // ->whereHas('masterPegawai', function ($q) {
+            //     $q->where('nama', 'like', 'Dedy Ya%');
+            // })
             ->join('master_pegawais', 'pegawai_histories.master_pegawai_id', '=', 'master_pegawais.id')
             ->select('pegawai_histories.*')
-            // ->where('master_pegawais.nama', 'like', '%Dedy Y%')
+            ->where('master_pegawais.nama', 'like', '%Yefy%')
             ->orderBy('master_pegawais.nik')
             ->orderBy('pegawai_histories.begin_date', 'desc')
             ->paginate(100)

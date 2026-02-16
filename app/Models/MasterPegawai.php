@@ -16,17 +16,6 @@ class MasterPegawai extends Model
         'foto', // ⬅️ WAJIB
     ];
 
-    // public function histories()
-    // {
-    //     return $this->hasMany(PegawaiHistory::class);
-    // }
-
-    // public function activeHistory()
-    // {
-    //     return $this->hasOne(PegawaiHistory::class)
-    //         ->where('is_active', true);
-    // }
-
     // =========================
     // RELATIONS
     // =========================
@@ -37,17 +26,40 @@ class MasterPegawai extends Model
 
     // public function activeHistory()
     // {
-    //     return $this->hasOne(PegawaiHistory::class, 'master_pegawai_id')
+    //     return $this->hasOne(\App\Models\PegawaiHistory::class, 'master_pegawai_id')
     //         ->where('is_active', 1)
-    //         ->orderByDesc('begin_date');
+    //         ->latest('end_date');
     // }
 
     public function activeHistory()
     {
+        $today = now()->toDateString();
+
         return $this->hasOne(\App\Models\PegawaiHistory::class, 'master_pegawai_id')
-            ->where('is_active', 1)
-            ->latest('end_date');
+            ->where('begin_date', '<=', $today)
+            ->where(function ($q) use ($today) {
+                $q->whereNull('end_date')
+                    ->orWhere('end_date', '>=', $today);
+            })
+            ->orderByDesc('begin_date');
     }
+
+    public function activeHistoryAt(string $date)
+    {
+        return $this->hasOne(\App\Models\PegawaiHistory::class, 'master_pegawai_id')
+            ->where('begin_date', '<=', $date)
+            ->where(function ($q) use ($date) {
+                $q->whereNull('end_date')
+                    ->orWhere('end_date', '>=', $date);
+            })
+            ->orderByDesc('begin_date');
+    }
+
+    // Cara pakai di Controller:
+    // $pegawais = MasterPegawai::with([
+    //     'activeHistoryAt' => fn ($q) => $q
+    // ])->get();
+
 
     public function getFotoUrlAttribute()
     {
