@@ -117,7 +117,7 @@ return [
         // Koneksi untuk database attendance (server lain)
         'devel_db' => [
             'driver' => 'mysql',
-            'host' => env('DB_ATT_HOST', '192.168.1.100'), // IP/domain server lain
+            'host' => env('DB_ATT_HOST'), // IP/domain server lain
             'port' => env('DB_ATT_PORT', '3306'),
             'database' => env('DB_ATT_DATABASE', 'attendance_db'),
             'username' => env('DB_ATT_USERNAME', 'attendance_user'),
@@ -131,7 +131,7 @@ return [
 
         'TEMP' => [
             'driver' => 'mysql',
-            'host' => env('DB_TEMP_HOST', '192.168.1.100'), // IP/domain server lain
+            'host' => env('DB_TEMP_HOST'), // IP/domain server lain
             'port' => env('DB_TEMP_PORT', '3306'),
             'database' => env('DB_TEMP_DATABASE', 'attendance_db'),
             'username' => env('DB_TEMP_USERNAME', 'attendance_user'),
