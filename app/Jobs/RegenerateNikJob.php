@@ -9,7 +9,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class RegenerateSummaryJob implements ShouldQueue
+class RegenerateNikJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -19,8 +19,8 @@ class RegenerateSummaryJob implements ShouldQueue
 
     public function __construct($nik,$date,$jobId)
     {
-        $this->nik = $nik;
-        $this->date = $date;
+        $this->nik = '--nik ' . $nik;
+        $this->date = '--from ' . $date;
         $this->jobId = $jobId;
     }
 
@@ -29,7 +29,7 @@ class RegenerateSummaryJob implements ShouldQueue
         $job = EtlJobNik::find($this->jobId);
         $job->update(['status'=>'running']);
 
-        $cmd = "python3 /opt/absensi-builder/etl/run_single.py {$this->nik} {$this->date}";
+        $cmd = "/opt/absensi-builder/venv/bin/python /opt/absensi-builder/etl/main.py {$this->nik} {$this->date}";
         exec($cmd." 2>&1", $output, $code);
 
         if($code===0){

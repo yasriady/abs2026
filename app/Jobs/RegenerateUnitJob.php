@@ -9,7 +9,7 @@ use Illuminate\Queue\SerializesModels;
 
 use function Laravel\Prompts\info;
 
-class RegenerateAbsensiJob implements ShouldQueue
+class RegenerateUnitJob implements ShouldQueue
 {
     use Dispatchable, Queueable, SerializesModels;
 

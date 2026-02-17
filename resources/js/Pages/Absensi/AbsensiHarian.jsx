@@ -1,10 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Head, router } from "@inertiajs/react";
 import AdminLayout from "@/Layouts/AdminLayout";
 import Modal from "@/Components/Modal";
-// import { router } from "@inertiajs/react";
 import { usePage } from "@inertiajs/react";
-
+import axios from "axios";
 
 export default function AbsensiHarian({
     pegawais,
@@ -60,57 +59,32 @@ export default function AbsensiHarian({
     // console.log(statusIn)
     // // console.log(statusOut)
 
-    function handleRegenerate() {
-        router.post(route("absensi.regenerate"), {
-            date: filters.date,
-            unit_id: filters.unit_id
-        });
-    }
+    const [loadingUnit, setLoadingUnit] = useState(false)
 
-    function RefreshButton({ nik, date }) {
-        const [loading, setLoading] = React.useState(false)
-        const [jobId, setJobId] = React.useState(null)
+    const regenerateUnit = async () => {
 
-        const run = async () => {
-            setLoading(true)
-
-            const res = await fetch("/api/absensi/regenerate", {
-                method: "POST",
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nik, date })
-            })
-
-            const json = await res.json()
-            setJobId(json.job_id)
+        if (!unitId) {
+            alert("Pilih unit dulu")
+            return
         }
 
-        React.useEffect(() => {
-            if (!jobId) return
+        setLoadingUnit(true)
 
-            const timer = setInterval(async () => {
-                const r = await fetch(`/api/absensi/regenerate-status/${jobId}`)
-                const j = await r.json()
-
-                if (j.status === "done" || j.status === "failed") {
-                    setLoading(false)
-                    clearInterval(timer)
-                }
-            }, 2000)
-
-            return () => clearInterval(timer)
-        }, [jobId])
-
-        return (
-            <button
-                className="btn btn-xs btn-primary"
-                disabled={loading}
-                onClick={run}
-                title="Regenerate Summary"
-            >
-                {loading ? "..." : "⟳"}
-            </button>
-        )
+        try {
+            await axios.post(route("absensi.regenerate.unit"), {
+                date: date,
+                unit_id: unitId
+            })
+        }
+        catch (err) {
+            console.error(err)
+            alert("Gagal regenerate unit")
+        }
+        finally {
+            setLoadingUnit(false)
+        }
     }
+
 
 
     /* ================= MODAL JAM ================= */
@@ -159,19 +133,23 @@ export default function AbsensiHarian({
 
     const [loadingMap, setLoadingMap] = useState({})
 
-    const regeneratePegawai = (nik) => {
+    const regeneratePegawai = async (nik) => {
 
         setLoadingMap(prev => ({ ...prev, [nik]: true }))
 
-        router.post(route("absensi.regenerate.nik"), {
-            nik: nik,
-            date: date
-        }, {
-            preserveScroll: true,
-            onFinish: () => {
-                setLoadingMap(prev => ({ ...prev, [nik]: false }))
-            }
-        })
+        try {
+            await axios.post(route("absensi.regenerate.nik"), {
+                nik: nik,
+                date: date
+            })
+        }
+        catch (err) {
+            console.error(err)
+            alert("Gagal menjalankan ETL")
+        }
+        finally {
+            setLoadingMap(prev => ({ ...prev, [nik]: false }))
+        }
     }
 
 
@@ -251,13 +229,15 @@ export default function AbsensiHarian({
                             >
                                 Show
                             </button>
-
                             <button
-                                onClick={handleRegenerate}
+                                onClick={regenerateUnit}
+                                disabled={loadingUnit}
                                 className="px-3 py-2 bg-blue-600 text-white rounded"
+                                style={{ opacity: loadingUnit ? 0.6 : 1 }}
                             >
-                                Regenerate Absensi
+                                {loadingUnit ? "Processing..." : "Regenerate Absensi"}
                             </button>
+
                         </div>
 
 
@@ -351,6 +331,7 @@ export default function AbsensiHarian({
                                                         onClick={() => regeneratePegawai(pegawai.nik)}
                                                         disabled={loadingMap[pegawai.nik]}
                                                         style={{
+                                                            display: 'none',
                                                             position: 'absolute',
                                                             top: -6,
                                                             right: -6,
@@ -418,7 +399,9 @@ export default function AbsensiHarian({
                                                 </a>
 
                                                 <div style={{ fontSize: 14, fontWeight: 600 }}>
-                                                    {summary?.time_in_final || "-"}
+                                                    {summary?.time_in_final
+                                                        ? summary.time_in_final.slice(0, -3)  // Menghapus detik (SS)
+                                                        : "-"}
                                                     {summary?.attribute_in && (
                                                         <span style={{ fontSize: 11, color: "#777", marginLeft: 4 }}>
                                                             {summary.attribute_in}
@@ -465,7 +448,9 @@ export default function AbsensiHarian({
                                                 </a>
 
                                                 <div style={{ fontSize: 14, fontWeight: 600 }}>
-                                                    {summary?.time_out_final || "-"}
+                                                    {summary?.time_out_final
+                                                        ? summary.time_out_final.slice(0, -3)  // Menghapus detik (SS)
+                                                        : "-"}
                                                     {summary?.attribute_out && (
                                                         <span style={{ fontSize: 11, color: "#777", marginLeft: 4 }}>
                                                             {summary.attribute_out}

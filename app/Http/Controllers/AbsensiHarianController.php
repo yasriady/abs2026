@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\RegenerateAbsensiJob;
-use App\Jobs\RegenerateSummaryJob;
+use App\Jobs\RegenerateNikJob;
+use App\Jobs\RegenerateUnitJob;
 use App\Models\Unit;
 use App\Models\SubUnit;
 use App\Models\MasterPegawai;
@@ -298,49 +298,38 @@ class AbsensiHarianController extends Controller
         return back()->with('success', 'Jam absensi berhasil diperbarui');
     }
 
-    // public function regenerateAll(Request $request)
-    // {
-    //     // info(__FUNCTION__);
+    public function regenerateUnit(Request $request)
+    {
+        // info(__FUNCTION__);
 
-    //     $user = $request->user();
+        $user = $request->user();
 
-    //     abort_if(
-    //         !$user->hasRole('admin') && !$user->hasRole('admin_unit'),
-    //         403
-    //     );
+        abort_if(
+            !$user->hasRole('admin') && !$user->hasRole('admin_unit'),
+            403
+        );
 
-    //     $date = $request->date ?? now()->toDateString();
+        $date = $request->date ?? now()->toDateString();
 
-    //     if ($user->hasRole('admin')) {
-    //         $unitId = $request->unit_id;
-    //     } else {
-    //         $unitId = $user->unit_id;
-    //     }
+        if ($user->hasRole('admin')) {
+            $unitId = $request->unit_id;
+        } else {
+            $unitId = $user->unit_id;
+        }
 
-    //     if (cache()->has("etl-running-$unitId")) {
-    //         return back()->with('error', 'ETL sedang berjalan');
-    //     }
+        if (cache()->has("etl-running-$unitId")) {
+            return back()->with('error', 'ETL sedang berjalan');
+        }
 
-    //     cache()->put("etl-running-$unitId", true, 300);
+        cache()->put("etl-running-$unitId", true, 300);
 
+        RegenerateUnitJob::dispatch(
+            $date,
+            $unitId
+        );
 
-    //     RegenerateAbsensiJob::dispatch(
-    //         $date,
-    //         $unitId
-    //     );
-
-    //     return back()->with('success', 'Proses regenerate dijalankan.');
-    // }
-
-    // public function regenerateSingle(Request $r)
-    // {
-    //     // dispatch(new RegenerateSummaryJob(
-    //     //     $r->nik,
-    //     //     $r->date
-    //     // ));
-
-    //     // return back();
-    // }
+        return back()->with('success', 'Proses regenerate dijalankan.');
+    }
 
     public function regenerateNik(Request $r)
     {
@@ -350,7 +339,7 @@ class AbsensiHarianController extends Controller
             'status' => 'queued'
         ]);
 
-        RegenerateSummaryJob::dispatch(
+        RegenerateNikJob::dispatch(
             $r->nik,
             $r->date,
             $job->id
