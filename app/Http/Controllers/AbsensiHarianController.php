@@ -3,11 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\RegenerateAbsensiJob;
+use App\Jobs\RegenerateSummaryJob;
 use App\Models\Unit;
 use App\Models\SubUnit;
 use App\Models\MasterPegawai;
 use App\Models\AbsensiSummary;
-use App\Models\Absent;
+use App\Models\EtlJobNik;
 use App\Models\Status;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -297,37 +298,71 @@ class AbsensiHarianController extends Controller
         return back()->with('success', 'Jam absensi berhasil diperbarui');
     }
 
-    public function regenerate(Request $request)
+    // public function regenerateAll(Request $request)
+    // {
+    //     // info(__FUNCTION__);
+
+    //     $user = $request->user();
+
+    //     abort_if(
+    //         !$user->hasRole('admin') && !$user->hasRole('admin_unit'),
+    //         403
+    //     );
+
+    //     $date = $request->date ?? now()->toDateString();
+
+    //     if ($user->hasRole('admin')) {
+    //         $unitId = $request->unit_id;
+    //     } else {
+    //         $unitId = $user->unit_id;
+    //     }
+
+    //     if (cache()->has("etl-running-$unitId")) {
+    //         return back()->with('error', 'ETL sedang berjalan');
+    //     }
+
+    //     cache()->put("etl-running-$unitId", true, 300);
+
+
+    //     RegenerateAbsensiJob::dispatch(
+    //         $date,
+    //         $unitId
+    //     );
+
+    //     return back()->with('success', 'Proses regenerate dijalankan.');
+    // }
+
+    // public function regenerateSingle(Request $r)
+    // {
+    //     // dispatch(new RegenerateSummaryJob(
+    //     //     $r->nik,
+    //     //     $r->date
+    //     // ));
+
+    //     // return back();
+    // }
+
+    public function regenerateNik(Request $r)
     {
-        // info(__FUNCTION__);
+        $job = EtlJobNik::create([
+            'nik' => $r->nik,
+            'date' => $r->date,
+            'status' => 'queued'
+        ]);
 
-        $user = $request->user();
-
-        abort_if(
-            !$user->hasRole('admin') && !$user->hasRole('admin_unit'),
-            403
+        RegenerateSummaryJob::dispatch(
+            $r->nik,
+            $r->date,
+            $job->id
         );
 
-        $date = $request->date ?? now()->toDateString();
+        return response()->json([
+            'job_id' => $job->id
+        ]);
+    }
 
-        if ($user->hasRole('admin')) {
-            $unitId = $request->unit_id;
-        } else {
-            $unitId = $user->unit_id;
-        }
-
-        if (cache()->has("etl-running-$unitId")) {
-            return back()->with('error', 'ETL sedang berjalan');
-        }
-
-        cache()->put("etl-running-$unitId", true, 300);
-
-
-        RegenerateAbsensiJob::dispatch(
-            $date,
-            $unitId
-        );
-
-        return back()->with('success', 'Proses regenerate dijalankan.');
+    public function statusNik($id)
+    {
+        return EtlJobNik::findOrFail($id);
     }
 }

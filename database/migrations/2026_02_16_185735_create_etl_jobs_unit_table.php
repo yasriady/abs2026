@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('etl_jobs', function (Blueprint $table) {
+        Schema::create('etl_job_units', function (Blueprint $table) {
             $table->id();
             $table->date('date');
             $table->integer('unit_id')->nullable();
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('etl_jobs');
+        Schema::dropIfExists('etl_job_units');
     }
 };

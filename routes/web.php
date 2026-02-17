@@ -248,8 +248,13 @@ Route::middleware('auth')->group(function () {
         [AbsensiHarianController::class, 'updateJam']
     )->name('absensi.updateJam');
 
-    Route::post('/absensi/regenerate', [AbsensiHarianController::class, 'regenerate'])
-        ->name('absensi.regenerate');
+    // Route::post('/absensi/regenerate-unit', [AbsensiHarianController::class, 'regenerateUnit'])
+    //     ->name('absensi.regenerate-unit');
+
+    Route::post('/absensi/regenerate-nik', [AbsensiHarianController::class, 'regenerateNik'])
+        ->name('absensi.regenerate.nik');
+    // Route::post('/absensi/regenerate-single', [AbsensiHarianController::class, 'regenerateNik']);
+    Route::get('/absensi/regenerate-single-status/{id}', [AbsensiHarianController::class, 'statusSingle']);
 });
 
 Route::middleware(['auth', 'permission:user.view'])->get('/user', [UserController::class, 'index']);

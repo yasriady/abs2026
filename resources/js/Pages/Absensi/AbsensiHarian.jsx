@@ -67,6 +67,52 @@ export default function AbsensiHarian({
         });
     }
 
+    function RefreshButton({ nik, date }) {
+        const [loading, setLoading] = React.useState(false)
+        const [jobId, setJobId] = React.useState(null)
+
+        const run = async () => {
+            setLoading(true)
+
+            const res = await fetch("/api/absensi/regenerate", {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nik, date })
+            })
+
+            const json = await res.json()
+            setJobId(json.job_id)
+        }
+
+        React.useEffect(() => {
+            if (!jobId) return
+
+            const timer = setInterval(async () => {
+                const r = await fetch(`/api/absensi/regenerate-status/${jobId}`)
+                const j = await r.json()
+
+                if (j.status === "done" || j.status === "failed") {
+                    setLoading(false)
+                    clearInterval(timer)
+                }
+            }, 2000)
+
+            return () => clearInterval(timer)
+        }, [jobId])
+
+        return (
+            <button
+                className="btn btn-xs btn-primary"
+                disabled={loading}
+                onClick={run}
+                title="Regenerate Summary"
+            >
+                {loading ? "..." : "⟳"}
+            </button>
+        )
+    }
+
+
     /* ================= MODAL JAM ================= */
 
     const [jamModal, setJamModal] = useState(false)
@@ -111,7 +157,22 @@ export default function AbsensiHarian({
         })
     }
 
+    const [loadingMap, setLoadingMap] = useState({})
 
+    const regeneratePegawai = (nik) => {
+
+        setLoadingMap(prev => ({ ...prev, [nik]: true }))
+
+        router.post(route("absensi.regenerate.nik"), {
+            nik: nik,
+            date: date
+        }, {
+            preserveScroll: true,
+            onFinish: () => {
+                setLoadingMap(prev => ({ ...prev, [nik]: false }))
+            }
+        })
+    }
 
 
     return (
@@ -278,13 +339,40 @@ export default function AbsensiHarian({
                                             <td className="text-left">
 
 
-                                                <a href={fotoUrl(pegawai.id)} data-lightbox="pegawai">
-                                                    <img
-                                                        src={fotoUrl(pegawai.id)}
-                                                        onError={(e) => e.target.src = '/images/no-image.png'}
-                                                        style={{ width: 55, height: 65, border: '1px solid #ddd' }}
-                                                    />
-                                                </a>
+                                                <div style={{ position: 'relative', width: 55, height: 65 }}>
+                                                    <a href={fotoUrl(pegawai.id)} data-lightbox="pegawai">
+                                                        <img
+                                                            src={fotoUrl(pegawai.id)}
+                                                            onError={(e) => e.target.src = '/images/no-image.png'}
+                                                            style={{ width: 55, height: 65, border: '1px solid #ddd' }}
+                                                        />
+                                                    </a>
+                                                    <button
+                                                        onClick={() => regeneratePegawai(pegawai.nik)}
+                                                        disabled={loadingMap[pegawai.nik]}
+                                                        style={{
+                                                            position: 'absolute',
+                                                            top: -6,
+                                                            right: -6,
+                                                            width: 20,
+                                                            height: 20,
+                                                            borderRadius: '50%',
+                                                            border: 'none',
+                                                            background: '#0ea5e9',
+                                                            color: 'white',
+                                                            fontSize: 11,
+                                                            cursor: 'pointer',
+                                                            opacity: loadingMap[pegawai.nik] ? 0.5 : 1
+                                                        }}
+                                                        title="Regenerate summary"
+                                                    >
+                                                        {loadingMap[pegawai.nik]
+                                                            ? <i className="fa fa-spinner fa-spin"></i>
+                                                            : "↻"
+                                                        }
+                                                    </button>
+
+                                                </div>
 
                                                 <div style={{ fontSize: 12, marginTop: 6 }}>
                                                     {filters.date}
