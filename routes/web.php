@@ -21,6 +21,13 @@ use App\Http\Controllers\VerifikasiAbsensiController;
 use App\Http\Controllers\HarianController;
 use App\Http\Controllers\HarianControllerX;
 use App\Http\Controllers\PegawaiFotoController;
+use App\Http\Controllers\RekapBulananController;
+use App\Http\Controllers\JamKerjaDinasController;
+use App\Http\Controllers\JamKerjaUnitController;
+use App\Http\Controllers\JamKerjaSubUnitController;
+use App\Http\Controllers\JamKerjaPegawaiController;
+use App\Http\Controllers\JamKerjaPreviewController;
+use App\Http\Controllers\DashboardController;
 
 require __DIR__ . '/auth.php';
 
@@ -75,9 +82,8 @@ Route::get('/absensi/foto/{inOut}/{sum_id}', [PegawaiFotoController::class, 'abs
 
 Route::middleware('auth')->group(function () {
 
-    Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->name('dashboard');
 
     // Route::get('/unit', [UnitController::class, 'index']);
     // Route::post('/unit', [UnitController::class, 'store']);
@@ -179,6 +185,76 @@ Route::middleware('auth')->group(function () {
     Route::get('/verifikasi-absensi', [VerifikasiAbsensiController::class, 'index'])
         ->name('verifikasi-absensi.index');
 
+    Route::prefix('jam-kerja')->group(function () {
+        Route::get('/dinas', [JamKerjaDinasController::class, 'index'])
+            ->middleware('permission:jamkerja.view')
+            ->name('jam-kerja.dinas.index');
+
+        Route::post('/dinas', [JamKerjaDinasController::class, 'store'])
+            ->middleware('permission:jamkerja.update')
+            ->name('jam-kerja.dinas.store');
+
+        Route::put('/dinas/{jadwalDinas}', [JamKerjaDinasController::class, 'update'])
+            ->middleware('permission:jamkerja.update')
+            ->name('jam-kerja.dinas.update');
+
+        Route::delete('/dinas/{jadwalDinas}', [JamKerjaDinasController::class, 'destroy'])
+            ->middleware('permission:jamkerja.update')
+            ->name('jam-kerja.dinas.destroy');
+
+        Route::get('/unit', [JamKerjaUnitController::class, 'index'])
+            ->middleware('permission:jamkerja.view')
+            ->name('jam-kerja.unit.index');
+
+        Route::post('/unit', [JamKerjaUnitController::class, 'store'])
+            ->middleware('permission:jamkerja.update')
+            ->name('jam-kerja.unit.store');
+
+        Route::put('/unit/{jadwalUnit}', [JamKerjaUnitController::class, 'update'])
+            ->middleware('permission:jamkerja.update')
+            ->name('jam-kerja.unit.update');
+
+        Route::delete('/unit/{jadwalUnit}', [JamKerjaUnitController::class, 'destroy'])
+            ->middleware('permission:jamkerja.update')
+            ->name('jam-kerja.unit.destroy');
+
+        Route::get('/sub-unit', [JamKerjaSubUnitController::class, 'index'])
+            ->middleware('permission:jamkerja.view')
+            ->name('jam-kerja.sub-unit.index');
+
+        Route::post('/sub-unit', [JamKerjaSubUnitController::class, 'store'])
+            ->middleware('permission:jamkerja.update')
+            ->name('jam-kerja.sub-unit.store');
+
+        Route::put('/sub-unit/{jadwalSubUnit}', [JamKerjaSubUnitController::class, 'update'])
+            ->middleware('permission:jamkerja.update')
+            ->name('jam-kerja.sub-unit.update');
+
+        Route::delete('/sub-unit/{jadwalSubUnit}', [JamKerjaSubUnitController::class, 'destroy'])
+            ->middleware('permission:jamkerja.update')
+            ->name('jam-kerja.sub-unit.destroy');
+
+        Route::get('/pegawai', [JamKerjaPegawaiController::class, 'index'])
+            ->middleware('permission:jamkerja.view')
+            ->name('jam-kerja.pegawai.index');
+
+        Route::post('/pegawai', [JamKerjaPegawaiController::class, 'store'])
+            ->middleware('permission:jamkerja.update')
+            ->name('jam-kerja.pegawai.store');
+
+        Route::put('/pegawai/{jadwalPegawai}', [JamKerjaPegawaiController::class, 'update'])
+            ->middleware('permission:jamkerja.update')
+            ->name('jam-kerja.pegawai.update');
+
+        Route::delete('/pegawai/{jadwalPegawai}', [JamKerjaPegawaiController::class, 'destroy'])
+            ->middleware('permission:jamkerja.update')
+            ->name('jam-kerja.pegawai.destroy');
+
+        Route::get('/preview', [JamKerjaPreviewController::class, 'index'])
+            ->middleware('permission:jamkerja.view')
+            ->name('jam-kerja.preview.index');
+    });
+
 
 
 
@@ -254,6 +330,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/absensi/regenerate-nik', [AbsensiHarianController::class, 'regenerateNik'])
         ->name('absensi.regenerate.nik');
     Route::get('/absensi/regenerate-single-status/{id}', [AbsensiHarianController::class, 'statusSingle']);
+
+    Route::apiResource('/rekap-bulanan', RekapBulananController::class);
+    Route::get('/rekap/print', [RekapBulananController::class, 'print'])
+        ->name('rekap.print');
 });
 
 Route::middleware(['auth', 'permission:user.view'])->get('/user', [UserController::class, 'index']);

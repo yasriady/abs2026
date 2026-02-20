@@ -18,8 +18,16 @@ export default function AbsensiHarian({
 }) {
 
     const fotoUrl = (id) => id ? `/pegawai/foto/${id}` : '/images/no-image.png'
-    const absensiFotoIn = (sum_id) => sum_id ? `/absensi/foto/in/${sum_id}` : '/images/no-tap.png'
-    const absensiFotoOut = (sum_id) => sum_id ? `/absensi/foto/out/${sum_id}` : '/images/no-tap.png'
+
+    const absensiFotoIn = (summary) =>
+        summary?.time_in_final
+            ? `/absensi/foto/in/${summary.id}?t=${summary.updated_at || Date.now()}`
+            : '/images/no-tap.png'
+
+    const absensiFotoOut = (summary) =>
+        summary?.time_out_final
+            ? `/absensi/foto/out/${summary.id}?t=${summary.updated_at || Date.now()}`
+            : '/images/no-tap.png'
 
     const [unitId, setUnitId] = useState(filters.unit_id || "");
     const [subUnitId, setSubUnitId] = useState(filters.sub_unit_id || "");
@@ -27,6 +35,7 @@ export default function AbsensiHarian({
         filters.date || new Date().toISOString().split("T")[0]
     );
     const [search, setSearch] = useState(filters.search || "");
+    // const { unit_id, sub_unit_id, date, search } = filters
 
     const handleFilter = () => {
         router.get(
@@ -59,6 +68,7 @@ export default function AbsensiHarian({
     // console.log(statusIn)
     // // console.log(statusOut)
 
+
     const [loadingUnit, setLoadingUnit] = useState(false)
 
     const regenerateUnit = async () => {
@@ -71,10 +81,12 @@ export default function AbsensiHarian({
         setLoadingUnit(true)
 
         try {
-            await axios.post(route("absensi.regenerate.unit"), {
+            await axios.post("/absensi/regenerate-unit", {
                 date: date,
                 unit_id: unitId
             })
+
+            router.reload()
         }
         catch (err) {
             console.error(err)
@@ -84,7 +96,6 @@ export default function AbsensiHarian({
             setLoadingUnit(false)
         }
     }
-
 
 
     /* ================= MODAL JAM ================= */
@@ -152,6 +163,7 @@ export default function AbsensiHarian({
         }
     }
 
+    console.log(route)
 
     return (
         <AdminLayout title="Absensi Harian">
@@ -178,7 +190,9 @@ export default function AbsensiHarian({
                                             date: date,
                                             search: search,
                                         },
-                                        { preserveState: true, replace: true }
+                                        {
+                                            replace: true
+                                        }
                                     );
                                 }}
                             >
@@ -390,9 +404,9 @@ export default function AbsensiHarian({
                                             {/* MASUK */}
                                             <td className="text-left">
 
-                                                <a href={absensiFotoIn(summary?.id)} data-lightbox="pegawai">
+                                                <a href={absensiFotoIn(summary)} data-lightbox="pegawai">
                                                     <img
-                                                        src={absensiFotoIn(summary?.id)}
+                                                        src={absensiFotoIn(summary)}
                                                         onError={(e) => e.target.src = '/images/no-tap.png'}
                                                         style={{ width: 55, height: 65, border: '1px solid #ddd' }}
                                                     />
@@ -439,9 +453,9 @@ export default function AbsensiHarian({
                                             {/* PULANG */}
                                             <td className="text-left">
 
-                                                <a href={absensiFotoOut(summary?.id)} data-lightbox="pegawai">
+                                                <a href={absensiFotoOut(summary)} data-lightbox="pegawai">
                                                     <img
-                                                        src={absensiFotoOut(summary?.id)}
+                                                        src={absensiFotoOut(summary)}
                                                         onError={(e) => e.target.src = '/images/no-tap.png'}
                                                         style={{ width: 55, height: 65, border: '1px solid #ddd' }}
                                                     />

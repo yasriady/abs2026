@@ -2,7 +2,7 @@
 import "../../css/adminlte.css"
 
 import { Head, usePage } from '@inertiajs/react'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import brand from '../brand'
 import { router } from '@inertiajs/react'
 import GlobalLoader from '@/Components/GlobalLoader'
@@ -10,6 +10,12 @@ import GlobalLoader from '@/Components/GlobalLoader'
 export default function AdminLayout({ title, children }) {
   const { url } = usePage()
   const { auth } = usePage().props
+  const jamKerjaOpen = url.startsWith('/jam-kerja')
+  const [isJamKerjaOpen, setIsJamKerjaOpen] = useState(jamKerjaOpen)
+
+  useEffect(() => {
+    setIsJamKerjaOpen(jamKerjaOpen)
+  }, [jamKerjaOpen])
 
   useEffect(() => {
     const fixLayout = () => {
@@ -109,11 +115,55 @@ export default function AdminLayout({ title, children }) {
               </a>
             </li>
 
-            <li>
-              <a href="/jam-kerja">
+            <li className={`treeview ${isJamKerjaOpen ? 'active menu-open' : ''}`}>
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault()
+                  setIsJamKerjaOpen((prev) => !prev)
+                }}
+              >
                 <i className="fa fa-clock-o"></i>
                 <span>Jam Kerja</span>
+                <span className="pull-right-container">
+                  <i className="fa fa-angle-left pull-right"></i>
+                </span>
               </a>
+              <ul
+                className="treeview-menu"
+                style={{ display: isJamKerjaOpen ? 'block' : 'none' }}
+              >
+                <li className={url.startsWith('/jam-kerja/dinas') ? 'active' : ''}>
+                  <a href="/jam-kerja/dinas">
+                    <i className="fa fa-circle-o"></i>
+                    Jadwal Dinas
+                  </a>
+                </li>
+                <li className={url.startsWith('/jam-kerja/unit') ? 'active' : ''}>
+                  <a href="/jam-kerja/unit">
+                    <i className="fa fa-circle-o"></i>
+                    Jadwal Unit
+                  </a>
+                </li>
+                <li className={url.startsWith('/jam-kerja/sub-unit') ? 'active' : ''}>
+                  <a href="/jam-kerja/sub-unit">
+                    <i className="fa fa-circle-o"></i>
+                    Jadwal Sub Unit
+                  </a>
+                </li>
+                <li className={url.startsWith('/jam-kerja/pegawai') ? 'active' : ''}>
+                  <a href="/jam-kerja/pegawai">
+                    <i className="fa fa-circle-o"></i>
+                    Jadwal Pegawai
+                  </a>
+                </li>
+                <li className={url.startsWith('/jam-kerja/preview') ? 'active' : ''}>
+                  <a href="/jam-kerja/preview">
+                    <i className="fa fa-circle-o"></i>
+                    Preview Resolver
+                  </a>
+                </li>
+              </ul>
             </li>
 
             <li>
@@ -207,7 +257,7 @@ export default function AdminLayout({ title, children }) {
         <strong>{brand.footerText}</strong>
       </footer>
 
-      {/* <GlobalLoader /> */}
+      <GlobalLoader />
 
     </div>
   )

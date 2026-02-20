@@ -123,16 +123,19 @@ class PegawaiFotoController extends Controller
             //     $constraint->upsize();
             // });
 
+            // Disable temporary
             // Optional: Tambahkan watermark/timestamp
-            $this->addAbsensiWatermark($image, $inOut, $filename);
+            // $this->addAbsensiWatermark($image, $inOut, $filename);
 
             // Return sebagai image response
             return response(
-                $image->toJpeg(85), // Kualitas 85%
+                $image->toJpeg(85),
                 200,
                 [
                     'Content-Type' => 'image/jpeg',
-                    'Cache-Control' => 'public, max-age=3600', // Cache 1 jam
+                    'Cache-Control' => 'no-cache, no-store, must-revalidate',
+                    'Pragma' => 'no-cache',
+                    'Expires' => '0',
                     'Content-Disposition' => 'inline; filename="' . $filename . '"'
                 ]
             );
@@ -154,54 +157,115 @@ class PegawaiFotoController extends Controller
     /**
      * Tambahkan watermark ke gambar absensi
      */
-    private function addAbsensiWatermark($image, string $inOut, string $filename): void
-    {
-        try {
-            // Parse data dari filename
-            $basename = pathinfo($filename, PATHINFO_FILENAME);
-            $parts = explode('_', $basename);
+private function addAbsensiWatermark($image, string $inOut, string $filename): void
+{
+    try {
+        $basename = pathinfo($filename, PATHINFO_FILENAME);
+        $parts = explode('_', $basename);
 
-            if (count($parts) === 3) {
-                list($nik, $date_str, $time_str) = $parts;
+        if (count($parts) === 3) {
+            [$nik, $date_str, $time_str] = $parts;
 
-                // Format tanggal dan waktu
-                $formatted_date = substr($date_str, 0, 4) . '-' .
-                    substr($date_str, 4, 2) . '-' .
-                    substr($date_str, 6, 2);
-
-                $formatted_time = substr($time_str, 0, 2) . ':' .
-                    substr($time_str, 2, 2) . ':' .
-                    substr($time_str, 4, 2);
-
-                $text_absensi = strtoupper($inOut) . " - " . $formatted_date . " " . $formatted_time;
-
-                // Tambahkan watermark timestamp
-                $image->text($text_absensi, 10, 20, function ($font) {
-                    $font->file(public_path('fonts/Roboto-Bold.ttf')); // Sesuaikan dengan font yang ada
-                    $font->size(20);
-                    $font->color('#ffffff');
-                    $font->align('left');
-                    $font->valign('top');
-                });
-
-                // Optional: Tambahkan background semi-transparent untuk watermark
-                $image->rectangle(5, 5, strlen($text_absensi) * 12 + 10, 40, function ($draw) {
-                    $draw->background('rgba(0, 0, 0, 0.5)');
-                });
+            if (strlen($date_str) !== 8 || strlen($time_str) !== 6) {
+                return;
             }
 
-            // Tambahkan watermark "ABSENSI" di pojok kanan bawah
-            $image->text('ABSENSI', $image->width() - 10, $image->height() - 10, function ($font) {
-                $font->size(24);
-                $font->color('rgba(255, 255, 255, 0.6)');
-                $font->align('right');
-                $font->valign('bottom');
+            $formatted_date = substr($date_str, 0, 4) . '-' .
+                substr($date_str, 4, 2) . '-' .
+                substr($date_str, 6, 2);
+
+            $formatted_time = substr($time_str, 0, 2) . ':' .
+                substr($time_str, 2, 2) . ':' .
+                substr($time_str, 4, 2);
+
+            $text_absensi = strtoupper($inOut) . " - " . $formatted_date . " " . $formatted_time;
+
+            /*
+            |--------------------------------------------------------------------------
+            | Hitung ukuran box background
+            |--------------------------------------------------------------------------
+            */
+            $fontSize  = 20;
+            $paddingX  = 20;
+            $paddingY  = 12;
+            $fontPath = public_path('fonts/Roboto-Bold.ttf');
+
+            // Hitung dimensi teks
+            if (file_exists($fontPath)) {
+                $bbox = imagettfbbox($fontSize, 0, $fontPath, $text_absensi);
+                $textWidth = $bbox[2] - $bbox[0];
+                $textHeight = $bbox[1] - $bbox[7];
+            } else {
+                $textWidth = mb_strlen($text_absensi) * ($fontSize * 0.6);
+                $textHeight = $fontSize;
+            }
+
+            $boxWidth  = $textWidth + ($paddingX * 2);
+            $boxHeight = $textHeight + ($paddingY * 2);
+
+            $boxX = 10;
+            $boxY = 10;
+
+            /*
+            |--------------------------------------------------------------------------
+            | Background rectangle untuk Intervention Image v3
+            |--------------------------------------------------------------------------
+            */
+            // Buat gambar baru untuk rectangle dengan GD driver
+            $manager = \Intervention\Image\ImageManager::gd();
+            
+            // Atau jika menggunakan parameter array (cara yang salah):
+            // $manager = new \Intervention\Image\ImageManager('gd');
+            
+            $overlay = $manager->create($boxWidth, $boxHeight);
+            
+            // Isi dengan background transparan
+            $overlay->fill('rgba(0,0,0,0)');
+            
+            // Gambar rectangle dengan background semi-transparan
+            $overlay->drawRectangle($boxX, $boxY, function ($draw) use ($boxWidth, $boxHeight) {
+                $draw->size($boxWidth, $boxHeight);
+                $draw->background('rgba(0,0,0,0.65)');
             });
-        } catch (\Throwable $e) {
-            // Jika gagal tambah watermark, lanjutkan tanpa watermark
-            \Log::warning('Failed to add watermark: ' . $e->getMessage());
+
+            // Gabungkan overlay ke image utama
+            $image->place($overlay);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Text watermark
+            |--------------------------------------------------------------------------
+            */
+            $textX = $boxX + $paddingX;
+            $textY = $boxY + $paddingY + ($textHeight * 0.2);
+
+            $image->text($text_absensi, $textX, $textY, function ($font) use ($fontPath, $fontSize) {
+                if (file_exists($fontPath)) {
+                    $font->file($fontPath);
+                }
+                $font->size($fontSize);
+                $font->color('ffffff');
+                $font->align('left');
+                $font->valign('top');
+            });
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Watermark kanan bawah
+        |--------------------------------------------------------------------------
+        */
+        $image->text('ABSENSI', $image->width() - 20, $image->height() - 20, function ($font) {
+            $font->size(24);
+            $font->color('rgba(255,255,255,0.6)');
+            $font->align('right');
+            $font->valign('bottom');
+        });
+    } catch (\Throwable $e) {
+        \Log::warning('Failed to add watermark: ' . $e->getMessage());
     }
+}
+
 
     /**
      * Tampilkan placeholder image jika gambar asli tidak ditemukan

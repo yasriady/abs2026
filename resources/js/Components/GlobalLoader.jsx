@@ -8,14 +8,14 @@ export default function GlobalLoader() {
         const start = () => setLoading(true)
         const finish = () => setLoading(false)
 
-        router.on('start', start)
-        router.on('finish', finish)
-        router.on('error', finish)
+        const offStart = router.on('start', start)
+        const offFinish = router.on('finish', finish)
+        const offError = router.on('error', finish)
 
         return () => {
-            router.off('start', start)
-            router.off('finish', finish)
-            router.off('error', finish)
+            if (typeof offStart === 'function') offStart()
+            if (typeof offFinish === 'function') offFinish()
+            if (typeof offError === 'function') offError()
         }
     }, [])
 

@@ -30,15 +30,15 @@ return new class extends Migration
              * STATUS FINAL (pengganti seluruh accessor status_*)
              * =====================================================
              */
-            $table->string('status_masuk_final', 10)
+            $table->string('status_masuk_final', 64)
                 ->nullable()
                 ->after('time_in_final');
 
-            $table->string('status_pulang_final', 10)
+            $table->string('status_pulang_final', 64)
                 ->nullable()
                 ->after('time_out_final');
 
-            $table->string('status_hari_final', 10)
+            $table->string('status_hari_final', 64)
                 ->nullable()
                 ->after('status_pulang_final');
 

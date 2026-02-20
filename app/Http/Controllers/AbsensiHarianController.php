@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 use function Laravel\Prompts\info;
 
@@ -301,6 +302,7 @@ class AbsensiHarianController extends Controller
     public function regenerateUnit(Request $request)
     {
         // info(__FUNCTION__);
+        Log::info("REGENERATE HIT", request()->all());
 
         $user = $request->user();
 
