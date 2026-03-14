@@ -92,4 +92,9 @@ class PegawaiHistory extends Model
     {
         return $this->id_struktur_organisasi;
     }
+
+    public function pegawai()
+    {
+        return $this->belongsTo(MasterPegawai::class, 'master_pegawai_id');
+    }
 }

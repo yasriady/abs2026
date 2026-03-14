@@ -12,6 +12,7 @@ export default function AdminLayout({ title, children }) {
   const { auth } = usePage().props
   const jamKerjaOpen = url.startsWith('/jam-kerja')
   const [isJamKerjaOpen, setIsJamKerjaOpen] = useState(jamKerjaOpen)
+  const [isDebugOpen, setIsDebugOpen] = useState(false)
 
   useEffect(() => {
     setIsJamKerjaOpen(jamKerjaOpen)
@@ -167,21 +168,65 @@ export default function AdminLayout({ title, children }) {
             </li>
 
             <li>
-              <a href="/pegawai">
+              <a href="/v1/pegawai">
                 <i className="fa fa-users"></i>
                 <span>Pegawai</span>
               </a>
             </li>
 
-            <li>
-              <a href="/v1/pegawai">
-                <i className="fa fa-users"></i>
-                <span>Pegawai v1</span>
-              </a>
-            </li>
-
             {/* HEADER ADMIN */}
             <li className="header">ADMIN</li>
+
+            {/* DEBUG MENU - ONLY FOR ADMIN */}
+            {auth.user?.role === 'admin' && (
+
+              <li className={`treeview ${isDebugOpen ? 'active menu-open' : ''}`}>
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setIsDebugOpen((prev) => !prev)
+                  }}
+                >
+                  <i className="fa fa-bug"></i>
+                  <span>Debug</span>
+                  <span className="pull-right-container">
+                    <i className="fa fa-angle-left pull-right"></i>
+                  </span>
+                </a>
+                <ul
+                  className="treeview-menu"
+                  style={{ display: isDebugOpen ? 'block' : 'none' }}
+                >
+                  <li>
+                    <a href="/pegawai">
+                      <i className="fa fa-users"></i>
+                      <span>Pegawai</span>
+                    </a>
+                  </li>
+
+                  <li>
+                    <a href="/absensi-raw">
+                      <i className="fa fa-circle-o"></i>
+                      Absensi Raw
+                    </a>
+                  </li>
+
+                  <li>
+                    <a href="/jam-kerja/preview-unit">
+                      <i className="fa fa-circle-o"></i>
+                      Preview Jadwal Unit
+                    </a>
+                  </li>
+                  <li>
+                    <a href="/debug/coba1">
+                      <i className="fa fa-circle-o"></i>
+                      Coba 1
+                    </a>
+                  </li>
+                </ul>
+              </li>
+            )}
 
             <li>
               <a href="/user">
@@ -223,10 +268,7 @@ export default function AdminLayout({ title, children }) {
               </a>
             </li>
 
-
           </ul>
-
-
 
         </section>
       </aside>

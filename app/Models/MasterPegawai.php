@@ -9,6 +9,8 @@ class MasterPegawai extends Model
 {
     // use SoftDeletes;
 
+    protected $connection = 'mysql';
+
     protected $fillable = [
         'nik',
         'nip',

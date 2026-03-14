@@ -14,6 +14,11 @@ use App\Models\Unit;
 use Illuminate\Support\Facades\Log;
 use App\Services\RekapBulananService;
 
+use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\RekapBulananExport;
+use App\Exports\RekapBulananPdf;
+
 class RekapBulananController extends Controller
 {
     public function index(Request $request)
@@ -214,8 +219,6 @@ class RekapBulananController extends Controller
             ->pluck('date')
             ->flip();
 
-        // dd($rows);
-
         return view('rekap.bulanan', [
             'rows'  => $rows,
             'dates' => $dates,
@@ -226,5 +229,75 @@ class RekapBulananController extends Controller
             'statusLabel' => $statusLabel,
             'periodeLabel' => $periodeLabel,
         ]);
+    }
+
+    public function exportPdf(Request $request)
+    {
+        return RekapBulananPdf::download($request);
+    }
+
+    public function exportPdf_x(Request $request)
+    {
+        $unitId = $request->unit_id;
+
+        // parse bulan
+        $bulan = $request->bulan; // format: YYYY-MM
+
+        $start = Carbon::createFromFormat('Y-m', $bulan)->startOfMonth()->format('Y-m-d');
+        $end   = Carbon::createFromFormat('Y-m', $bulan)->endOfMonth()->format('Y-m-d');
+
+        // debug cek
+        // dd($unitId,$start,$end);
+
+        $data = app(\App\Services\RekapBulananService::class)
+            ->generate(
+                $unitId,
+                $request->sub_unit_id,
+                $start,
+                $end,
+                $request->status_pegawai,
+                $request->nik
+            );
+
+        if ($data instanceof \Illuminate\Support\Collection) {
+            $data = $data->toArray();
+        }
+
+        $pdf = Pdf::loadView('rekap.pdf', [
+            'rows' => $data['rows'] ?? [],
+            'dates' => $data['dates'] ?? [],
+            'libur' => $data['libur'] ?? [],
+            'unitName' => $data['unitName'] ?? '',
+            'statusLabel' => $data['statusLabel'] ?? '',
+            'periodeLabel' => $data['periodeLabel'] ?? ''
+        ]);
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('rekap.pdf', $data)
+            ->setPaper('a4', 'landscape');
+
+        return $pdf->download('rekap-' . $bulan . '.pdf');
+    }
+
+    // public function exportExcel(Request $request)
+    // {
+    //     return Excel::download(
+    //         new RekapBulananExport($request->all()),
+    //         'rekap-absensi.xlsx'
+    //     );
+    // }
+
+    public function exportExcel(Request $request)
+    {
+        return \App\Exports\RekapBulananExport::download($request);
+    }
+
+    public function exportParams()
+    {
+        return [
+            'unit_id' => request('unit_id'),
+            'sub_unit_id' => request('sub_unit_id'),
+            'bulan' => request('bulan'),
+            'status_pegawai' => request('status_pegawai')
+        ];
     }
 }

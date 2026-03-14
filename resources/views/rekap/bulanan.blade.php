@@ -8,115 +8,45 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            font-size: 12px;
+            font-size: 11px;
         }
 
-        table {
+        /* TABLE */
+        .rekap {
             border-collapse: collapse;
             width: 100%;
-            font-family: Arial, sans-serif;
-            font-size: 0.55em;
-        }
-
-        th,
-        td {
-            border: 1px solid #dfdfdf;
-            padding: 4px;
-            text-align: center;
-        }
-
-        th {
-            /* background: #eee; */
-        }
-
-        .text-left {
-            text-align: left;
-        }
-
-        .small {
-            font-size: 11px;
-        }
-
-        .rekap {
-            border-collapse: collapse;
-            font-size: 12px;
-        }
-
-
-
-        .bg-red {
-            background: #f8caca;
-        }
-
-        .bg-yellow {
-            background: #fff3b0;
-        }
-
-        .bg-gray {
-            background: #eee;
-        }
-
-        .out {
-            color: #555;
-            font-size: 11px;
-        }
-
-        .bg-red {
-            background: #f8caca;
-        }
-
-        .bg-yellow {
-            background: #fff3b0;
-        }
-
-        .bg-white {
-            background: #ffffff;
-        }
-
-        .bg-gray {
-            background: #eee;
-        }
-
-        .rekap {
-            border-collapse: collapse;
-            font-size: 11px;
-            letter-spacing: -0.15px;
-        }
-
-        .rekap {
-            /* table-layout: fixed; */
+            /* table-layout: auto; */
+            /* penting */
+            table-layout: fixed;
         }
 
         .rekap th,
         .rekap td {
-            border: 1px solid #ccc;
-            padding: 4px;
-            text-align: center;
-            white-space: nowrap;
-            border: 1px solid #cfcfcf;
+            border: 1px solid #999;
             padding: 2px 4px;
-            line-height: 1.1;
+            line-height: 1.2;
             white-space: nowrap;
-            text-align: center;
             vertical-align: middle;
         }
 
-        .rekap td {
-            font-size: 0.75em;
+        /* HEADER */
+        .rekap th {
+            font-weight: 600;
+            text-align: center;
         }
 
-        /* kolom nama */
-        .rekap td.nama {
+        /* NAMA */
+        .nama {
             text-align: left;
+            font-size: 0.80em;
         }
 
-        /* baris kedua (jam pulang) lebih kecil */
-        .rekap .out {
-            font-size: 10px;
-            color: #444;
+        /* ANGKA */
+        .num {
+            text-align: center;
         }
 
-        /* warna status */
+        /* STATUS COLORS */
         .bg-red {
             background: #f6b0b0;
         }
@@ -125,12 +55,12 @@
             background: #ffe699;
         }
 
-        .bg-white {
-            background: #ffffff;
+        .bg-gray {
+            background: #eee;
         }
 
-        .bg-gray {
-            background: #eeeeee;
+        .bg-white {
+            background: #fff;
         }
 
         .holiday {
@@ -138,48 +68,23 @@
             font-weight: bold;
         }
 
+        /* HEADER BOX */
         .header-wrap {
-            background: #ececec;
-            border: 1px solid #d9d9d9;
+            /* background: #ececec; */
+            /* border: 1px solid #bdbdbd; */
             padding: 8px 10px;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            gap: 12px;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-        }
-
-        .header-logo {
-            width: 32px;
-            height: 32px;
-            object-fit: contain;
-            flex-shrink: 0;
-            margin-top: 2px;
         }
 
         .header-title {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
-            line-height: 1.25;
         }
 
         .header-meta {
-            font-size: 13px;
-            line-height: 1.35;
-        }
-
-        .header-right {
-            text-align: right;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 18px;
+            font-size: 12px;
         }
 
         .print-btn {
@@ -192,97 +97,230 @@
             cursor: pointer;
         }
 
-        .header-note {
-            font-size: 13px;
-        }
-
         @media print {
             .print-btn {
                 display: none;
             }
+
+            .rekap {
+                table-layout: auto;
+            }
+        }
+
+        /* kolom nama */
+        .rekap .nama {
+            min-width: 110px;
+            width: 120px;
+            white-space: normal;
+        }
+
+        /* kolom tanggal dibuat ramping */
+        .rekap .tgl {
+            width: 35px;
+            min-width: 35px;
+            max-width: 35px;
+            padding: 1px 2px;
+        }
+
+        /* teks jam lebih kecil agar muat */
+        .rekap .tgl {
+            font-size: 0.65em;
+            text-align: center;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+            margin-left: 6px;
+        }
+
+        .dropdown-btn {
+            border: 0;
+            background: #2d6cdf;
+            color: #fff;
+            border-radius: 3px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background: #fff;
+            min-width: 160px;
+            border: 1px solid #ccc;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, .15);
+            z-index: 99;
+        }
+
+        .dropdown-content a {
+            color: #333;
+            padding: 7px 10px;
+            text-decoration: none;
+            display: block;
+            font-size: 12px;
+        }
+
+        .dropdown-content a:hover {
+            background: #f1f1f1;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        @media print {
+            .dropdown {
+                display: none;
+            }
+        }
+
+        .rekap thead th {
+            background: #f3f3f3;
+            border-bottom: 2px solid #666;
+        }
+
+        .sum {
+            width: 60px;
+            min-width: 60px;
+            max-width: 60px;
+            font-size: 0.85em;
+        }
+
+        .sum2 {
+            width: 32px;
+            min-width: 32px;
+            max-width: 32px;
+            font-size: 0.85em;
+        }
+
+        .sum3 {
+            width: 40px;
+            min-width: 40px;
+            max-width: 40px;
+            font-size: 0.85em;
+        }
+
+        .rekap th,
+        .rekap td {
+            box-sizing: border-box;
+        }
+
+        .rekap th[rowspan] {
+            vertical-align: middle;
+        }
+
+        @page {
+            size: landscape;
+            margin: 0;
+        }
+
+        .nama {
+            word-break: break-word;
+        }
+
+        .tidakhadir {
+            font-size: 0.75em;
+            width: 38px;
+            min-width: 38px;
+            max-width: 38px;
         }
     </style>
-
 </head>
 
 <body>
 
     <div class="header-wrap">
-        <div class="header-left">
-            <img src="{{ asset('images/logo_pekanbaru_xs.png') }}" alt="Logo" class="header-logo">
-            <div>
-                <div class="header-title">Pemerintah Kota Pekanbaru</div>
-                <div class="header-title">Rekapitulasi Absensi Bulanan</div>
-                <div class="header-meta">
-                    Unit : <b>{{ $unitName }}</b> ({{ $statusLabel }})
-                </div>
-                <div class="header-meta">
-                    Periode : {{ $periodeLabel }}
-                </div>
+        <div>
+            <div class="header-title">Pemerintah Kota Pekanbaru</div>
+            <div class="header-title">Rekapitulasi Absensi Bulanan</div>
+            <div class="header-meta">
+                Unit : <b>{{ $unitName }}</b> ({{ $statusLabel }})
+            </div>
+            <div class="header-meta">
+                Periode : {{ $periodeLabel }}
             </div>
         </div>
-        <div class="header-right">
-            <button type="button" class="print-btn" onclick="window.print()">print</button>
-            <div class="header-note">Note: T=Telat, X=Batal, Adm=Admin</div>
+
+        <div style="display:flex; align-items:flex-start; gap:6px;">
+
+            <button class="print-btn" onclick="window.print()">Print</button>
+
+            <div class="dropdown">
+                <button class="dropdown-btn">Export ▾</button>
+                <div class="dropdown-content">
+                    <a href="{{ route('rekap.export.pdf', request()->query()) }}">
+                        Export PDF
+                    </a>
+                    <a href="{{ route('rekap.export.excel', request()->query()) }}">
+                        Export Excel (.xlsx)
+                    </a>
+                </div>
+            </div>
+
         </div>
+
     </div>
 
+    <table class="rekap">
 
-
-    <table class="rekap" style="">
         <thead>
 
-            {{-- ROW HEADER 1 --}}
+            {{-- HEADER BARIS 1 --}}
             <tr>
                 <th rowspan="2">No</th>
-                <th rowspan="2">Nama</th>
+                <th rowspan="2" class="nama">Nama</th>
 
-                {{-- GROUP TANGGAL --}}
-                <th colspan="{{ count($dates) }}">Tanggal</th>
+                @foreach($dates as $tgl)
+                @php
+                $d=\Carbon\Carbon::parse($tgl);
+                $isLibur=isset($libur[$tgl]);
+                @endphp
 
-                <th rowspan="2">Total<br />Hari</th>
-                <th rowspan="2">Hari<br>Kerja</th>
-                <th rowspan="2">Menit<br>Telat+PC</th>
-                <th rowspan="2">&nbsp; <br />%Pot</th>
-                <th rowspan="2">Total<br />Alpa</th>
-                <th rowspan="2">%Pot</th>
+                <th class="tgl {{ $isLibur?'holiday':'' }}">
+                    {{ $d->format('d/m') }}
+                </th>
+                @endforeach
 
-                {{-- GROUP TIDAK HADIR --}}
+                <th colspan="1" class="sum2">Total</th>
+                <th colspan="1" class="sum2">Hari</th>
+                <th colspan="2" class="sum">Menit Telat</th>
+                <th colspan="2" class="sum">Total Alpa</th>
                 <th colspan="9">Tidak Hadir</th>
             </tr>
 
 
-            {{-- ROW HEADER 2 --}}
+            {{-- HEADER BARIS 2 --}}
             <tr>
 
-                {{-- LOOP TANGGAL --}}
                 @foreach($dates as $tgl)
+                @php $d=\Carbon\Carbon::parse($tgl); @endphp
 
-                @php
-                $d = \Carbon\Carbon::parse($tgl);
-                if($d->isWeekend()) continue;
-                $isLibur = isset($libur[$tgl]);
-                @endphp
-
-                <th class="{{ $isLibur ? 'holiday' : '' }}">
-                    {{ $d->format('d/m') }}
-                    <br>
-                    <small>{{ $d->locale('id')->translatedFormat('D') }}</small>
+                <th class="tgl">
+                    {{ $d->locale('id')->translatedFormat('D') }}
                 </th>
-
                 @endforeach
 
+                <th class="sum">Hari</th>
+                <th class="sum">Kerja</th>
 
-                {{-- KOLOM STATUS --}}
-                <th>DL</th>
-                <th>CT</th>
-                <th>CBS</th>
-                <th>CS</th>
-                <th>CM</th>
-                <th>CKAP</th>
-                <th>CB</th>
-                <th>CLTN</th>
-                <th>TB</th>
+                <th class="sum">JML</th>
+                <th class="sum">%Pot</th>
+
+                <th class="sum">Alpa</th>
+                <th class="sum">%Pot</th>
+
+                <th class="tidakhadir">DL</th>
+                <th class="tidakhadir">CT</th>
+                <th class="tidakhadir">CBS</th>
+                <th class="tidakhadir">CS</th>
+                <th class="tidakhadir">CM</th>
+                <th class="tidakhadir">CKAP</th>
+                <th class="tidakhadir">CB</th>
+                <th class="tidakhadir">CLTN</th>
+                <th class="tidakhadir">TB</th>
 
             </tr>
 
@@ -293,84 +331,56 @@
 
             @foreach($rows as $i=>$row)
 
-            {{-- ROW MASUK --}}
-            <tr class="pegawai-start">
-
-                <td rowspan="2" style="vertical-align: top;">
-                    {{ $i+1 }}
-                </td>
-                <td rowspan="1" style="text-align: left;">
-                    {{ $row['nama'] }}
-                </td>
-
-                @foreach($dates as $tgl)
-
-                @php
-                $cell = $row['dates'][$tgl];
-                $symbol = $cell['symbol'];
-                $raw = $cell['raw'];
-
-                $color = '';
-
-                if($symbol == '-') $color='bg-gray';
-                elseif($symbol == 'A') $color='bg-red';
-                elseif(str_contains($symbol,'T')) $color='bg-yellow';
-                @endphp
-
-                <td class="{{ $cell['color_in'] }}">
-                    {{ $raw['time_in_fmt'] ?? '-' }}
-                </td>
-
-                @endforeach
-
-                <td rowspan="2">{{ $row['stats']['total_hari'] }}</td>
-                <td rowspan="2">{{ $row['stats']['hari_kerja'] }}</td>
-                <td rowspan="2">{{ $row['stats']['menit_telat'] }}</td>
-                <td rowspan="2">x</td>
-                <td rowspan="2">{{ $row['stats']['total_alpa'] }}</td>
-                <td rowspan="2">x</td>
-
-                <td rowspan="2">{{ $row['stats']['DL'] ?? 0 }}</td>
-                <td rowspan="2">{{ $row['stats']['CT'] ?? 0  }}</td>
-                <td rowspan="2">{{ $row['stats']['CBS'] ?? 0  }}</td>
-                <td rowspan="2">{{ $row['stats']['CS']  ?? 0 }}</td>
-                <td rowspan="2">{{ $row['stats']['CM']  ?? 0 }}</td>
-                <td rowspan="2">{{ $row['stats']['CKAP'] ?? 0  }}</td>
-                <td rowspan="2">{{ $row['stats']['CB']  ?? 0 }}</td>
-                <td rowspan="2">{{ $row['stats']['CLTN']  ?? 0 }}</td>
-                <td rowspan="2">{{ $row['stats']['TB']  ?? 0 }}</td>
-
-            </tr>
-
-            {{-- ROW PULANG --}}
             <tr>
 
-                <td rowspan="1" style="text-align: left;">
+                <td class="num">{{ $i+1 }}</td>
+
+                {{-- MERGED NAMA + NIK --}}
+                <td class="nama">
+                    {{ $row['nama'] }}<br>
                     {{ $row['nik'] }}
                 </td>
 
-                @foreach($dates as $tgl)
 
+                @foreach($dates as $tgl)
                 @php
-                $cell = $row['dates'][$tgl];
-                $raw = $cell['raw'];
+                $cell=$row['dates'][$tgl];
                 @endphp
 
-                <td class="{{ $cell['color_out'] }}">
-                    {{ $raw['time_out_fmt'] ?? '-' }}
+                <td class="tgl {{ $cell['color_in'] }}">
+                    {{ $cell['raw']['time_in_fmt'] ?? '-' }}<br>
+                    {{ $cell['raw']['time_out_fmt'] ?? '-' }}
                 </td>
-
                 @endforeach
+
+
+                <td class="num sum">{{ $row['stats']['total_hari'] }}</td>
+                <td class="num sum">{{ $row['stats']['hari_kerja'] }}</td>
+                <td class="num sum">{{ $row['stats']['menit_telat'] }}</td>
+                <td class="num sum">x</td>
+                <td class="num sum">{{ $row['stats']['total_alpa'] }}</td>
+                <td class="num sum">x</td>
+
+                <td class="num tidakhadir">{{ $row['stats']['DL'] ?? 0 }}</td>
+                <td class="num tidakhadir">{{ $row['stats']['CT'] ?? 0 }}</td>
+                <td class="num tidakhadir">{{ $row['stats']['CBS'] ?? 0 }}</td>
+                <td class="num tidakhadir">{{ $row['stats']['CS'] ?? 0 }}</td>
+                <td class="num tidakhadir">{{ $row['stats']['CM'] ?? 0 }}</td>
+                <td class="num tidakhadir">{{ $row['stats']['CKAP'] ?? 0 }}</td>
+                <td class="num tidakhadir">{{ $row['stats']['CB'] ?? 0 }}</td>
+                <td class="num tidakhadir">{{ $row['stats']['CLTN'] ?? 0 }}</td>
+                <td class="num tidakhadir">{{ $row['stats']['TB'] ?? 0 }}</td>
 
             </tr>
 
             @endforeach
+
         </tbody>
     </table>
 
     <br>
 
-    <div style="font-size:11px">
+    <div style="font-size:10px">
         <b>Keterangan:</b><br>
         H = Hadir<br>
         T = Terlambat<br>

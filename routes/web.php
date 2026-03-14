@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AbsensiHarianController;
+use App\Http\Controllers\AbsensiRawController;
 use App\Http\Controllers\Admin\PegawaiHistorisRawController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Devel\BaseDevelController;
@@ -27,7 +28,10 @@ use App\Http\Controllers\JamKerjaUnitController;
 use App\Http\Controllers\JamKerjaSubUnitController;
 use App\Http\Controllers\JamKerjaPegawaiController;
 use App\Http\Controllers\JamKerjaPreviewController;
+use App\Http\Controllers\JamKerjaPreviewUnitController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DataMesinAbsenController;
+use App\Http\Controllers\Debug\DebugController;
 
 require __DIR__ . '/auth.php';
 
@@ -334,9 +338,32 @@ Route::middleware('auth')->group(function () {
     Route::apiResource('/rekap-bulanan', RekapBulananController::class);
     Route::get('/rekap/print', [RekapBulananController::class, 'print'])
         ->name('rekap.print');
+
+    Route::get('/rekap/export/pdf', [RekapBulananController::class, 'exportPdf'])
+        ->name('rekap.export.pdf');
+    // Route::get('/rekap/pdf', [RekapBulananController::class, 'exportPdf']);
+
+    Route::get('/rekap/export/excel', [RekapBulananController::class, 'exportExcel'])
+        ->name('rekap.export.excel');
+
+    Route::get('/jam-kerja/preview-unit', [JamKerjaPreviewUnitController::class, 'index'])
+        ->name('jam-kerja.preview-unit');
+
+    Route::get('/data-mesin-absen', [DataMesinAbsenController::class, 'index'])
+        ->name('data-mesin-absen.index');
+    Route::get('/absensi-raw', [AbsensiRawController::class, 'index'])
+        ->name('absensi.raw');
 });
 
 Route::middleware(['auth', 'permission:user.view'])->get('/user', [UserController::class, 'index']);
 Route::middleware(['auth', 'permission:user.create'])->post('/user', [UserController::class, 'store']);
 Route::middleware(['auth', 'permission:user.update'])->put('/user/{user}', [UserController::class, 'update']);
 Route::middleware(['auth', 'permission:user.delete'])->delete('/user/{user}', [UserController::class, 'destroy']);
+
+// Ganti route debug yang ada:
+// Route::get('/debug/coba1', [DebugController::class, 'coba1']);
+// Menjadi:
+Route::middleware(['auth', 'permission:debug.access'])->group(function () {
+    Route::get('/debug/coba1', [DebugController::class, 'coba1'])->name('debug.coba1');
+    Route::get('/debug/coba2', [DebugController::class, 'coba2'])->name('debug.coba2');
+});

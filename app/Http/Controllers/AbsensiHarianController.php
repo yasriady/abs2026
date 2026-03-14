@@ -9,6 +9,7 @@ use App\Models\SubUnit;
 use App\Models\MasterPegawai;
 use App\Models\AbsensiSummary;
 use App\Models\EtlJobNik;
+use App\Models\PegawaiHistory;
 use App\Models\Status;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -53,18 +54,6 @@ class AbsensiHarianController extends Controller
                 ->get();
         }
 
-        // $statuses = Status::enabled()
-        //     ->orderBy('ordering')
-        //     ->get([
-        //         'name',
-        //         'desc',
-        //         'color',
-        //         'day',
-        //         'in',
-        //         'out'
-        //     ]);
-
-
         // =======================
         // STEP 1: ACTIVE PEGAWAI IDS
         // =======================
@@ -84,7 +73,7 @@ class AbsensiHarianController extends Controller
             $activePegawaiIds->where('id_sub_unit', $request->sub_unit_id);
         }
 
-        $activePegawaiIds = $activePegawaiIds->distinct();
+        $activePegawaiIds = $activePegawaiIds->distinct()->pluck('master_pegawai_id');
 
         // =======================
         // STEP 2: MASTER PEGAWAI PAGINATION
@@ -107,7 +96,26 @@ class AbsensiHarianController extends Controller
             ->withQueryString();
 
         // =======================
-        // STEP 3: LOAD SUMMARY BATCH
+        // STEP 3: LOAD HISTORY FOR ALL PEGAWAI IN THIS PAGE
+        // =======================
+        $pegawaiIds = $paginator->getCollection()->pluck('id');
+
+        $histories = PegawaiHistory::whereIn('master_pegawai_id', $pegawaiIds)
+            ->where('begin_date', '<=', $date)
+            ->where(function ($q) use ($date) {
+                $q->whereNull('end_date')
+                    ->orWhere('end_date', '>=', $date);
+            })
+            ->with(['unit', 'subUnit'])
+            ->get()
+            ->groupBy('master_pegawai_id')
+            ->map(function ($items) {
+                // Ambil history terbaru berdasarkan begin_date
+                return $items->sortByDesc('begin_date')->first();
+            });
+
+        // =======================
+        // STEP 4: LOAD SUMMARY BATCH
         // =======================
         $niks = $paginator->getCollection()
             ->pluck('nik')
@@ -137,19 +145,24 @@ class AbsensiHarianController extends Controller
                 'notes_in',
                 'notes_out',
             ])
-            // ->with([
-            //     'deviceIn:device_id,desc',
-            //     'deviceOut:device_id,desc',
-            // ])
             ->whereDate('date', $date)
             ->whereIn('nik', $niks)
             ->get()
             ->keyBy('nik');
 
         // =======================
-        // STEP 4: INJECT SUMMARY
+        // STEP 5: INJECT SUMMARY & UNIT INFO
         // =======================
-        $paginator->getCollection()->transform(function ($pegawai) use ($summaries) {
+        $paginator->getCollection()->transform(function ($pegawai) use ($summaries, $histories) {
+
+            // Ambil history dari collection yang sudah kita siapkan
+            $activeHistory = $histories->get($pegawai->id);
+
+            // Inject unit dan sub unit ke pegawai
+            $pegawai->unit_name = $activeHistory?->unit?->unit;
+            $pegawai->sub_unit_name = $activeHistory?->subUnit?->sub_unit;
+            $pegawai->unit_id = $activeHistory?->id_unit;
+            $pegawai->sub_unit_id = $activeHistory?->id_sub_unit;
 
             $summary = $summaries->get(trim($pegawai->nik));
 
@@ -181,7 +194,6 @@ class AbsensiHarianController extends Controller
                 'notes_hari'    => $summary->notes_hari,
                 'notes_in'    => $summary->notes_in,
                 'notes_out'    => $summary->notes_out,
-
             ];
 
             return $pegawai;
@@ -209,13 +221,11 @@ class AbsensiHarianController extends Controller
 
             'units'    => $units,
             'subUnits' => $subUnits,
-            // 'statuses' => $statuses,
             'statusDay' => Status::enabled()->forDay()->get(),
             'statusIn'  => Status::enabled()->forIn()->get(),
-            // 'statusOut' => Status::enabled()->forOut()->get(),
-
         ]);
     }
+
 
     public function updateStatus(Request $r)
     {

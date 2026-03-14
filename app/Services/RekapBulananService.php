@@ -228,7 +228,8 @@ class RekapBulananService
 
         // dd(collect($result)->sortBy('nama')->values());
 
-        return collect($result)->sortBy('nama')->values();
+        // return collect($result)->sortBy('nama')->values();
+        return $result;
     }
 
     protected function countHariKerjaPeriode(array $dates, $hariLiburSet): int
@@ -272,7 +273,7 @@ class RekapBulananService
             'CLTN' => 0,
             'TB' => 0,
             'total_menit' => 0,
-            
+
             // NEW
             'menit_telat' => 0,
             'total_hari' => 0,
@@ -360,20 +361,44 @@ class RekapBulananService
     */
     protected function applyStatus(&$row, $tgl, $absen, bool $isWeekend = false, bool $isHoliday = false)
     {
-        $status = strtoupper(trim((string) ($absen->status_hari_final ?? 'A')));
-        $symbol = $status;
+        $status = strtoupper(trim((string) ($absen->status_hari_final ?? '')));
+        $symbol = $status ?: '-';
+
         $statusMasuk = strtoupper((string) ($absen->status_masuk_final ?? ''));
         $statusPulang = strtoupper((string) ($absen->status_pulang_final ?? ''));
+
         $hasTapIn = !empty($absen->time_in_final);
         $hasTapOut = !empty($absen->time_out_final);
-        $isTotalAlpaDay = !$hasTapIn && !$hasTapOut;
 
-        if ($isTotalAlpaDay && !$isWeekend && !$isHoliday) {
+        /*
+    |--------------------------------------------------------------------------
+    | CEK APAKAH HARI INI TERMASUK HARI KERJA VALID
+    |--------------------------------------------------------------------------
+    | weekend/libur tetap dihitung jika ada jadwal manual pegawai
+    */
+
+        $hasManualSchedule = ($absen->sumber_jadwal ?? null) === 'pegawai';
+
+        $isWorkday = (!$isWeekend && !$isHoliday) || $hasManualSchedule;
+
+        /*
+    |--------------------------------------------------------------------------
+    | ALPA (HANYA BERDASARKAN status_hari_final)
+    |--------------------------------------------------------------------------
+    */
+        if ($isWorkday && in_array($status, ['A', 'ALPA', 'ALPHA'], true)) {
             $row['stats']['total_alpa']++;
         }
 
-        // MT (Menit Telat+PC): akumulasi late+early, kecuali hari yang sudah masuk TotalAlpa.
-        if (!$isTotalAlpaDay && !$isWeekend && !$isHoliday) {
+        /*
+    |--------------------------------------------------------------------------
+    | MENIT TELAT + PULANG CEPAT
+    |--------------------------------------------------------------------------
+    | dihitung hanya jika hari kerja valid
+    | dan bukan ALPA
+    */
+        if ($isWorkday && !in_array($status, ['A', 'ALPA', 'ALPHA'], true)) {
+
             $menitTelatMasuk = max(0, (int) ($absen->late_minutes ?? 0));
             $menitPulangCepat = max(0, (int) ($absen->early_minutes ?? 0));
             $totalMenitPelanggaran = $menitTelatMasuk + $menitPulangCepat;
@@ -393,9 +418,10 @@ class RekapBulananService
                 ? substr($absen->time_in_final, 0, 5)
                 : 'H';
 
-            $isTelat = str_contains($statusMasuk, '/T')
-                || $statusMasuk === 'TELAT'
-                || $statusMasuk === 'TERLAMBAT';
+            $isTelat =
+                str_contains($statusMasuk, '/T') ||
+                $statusMasuk === 'TELAT' ||
+                $statusMasuk === 'TERLAMBAT';
 
             if ($isTelat) {
                 $symbol .= 'T';
@@ -407,19 +433,17 @@ class RekapBulananService
 
         /*
     |--------------------------------------------------------------------------
-    | ALPA
+    | ALPA (DISPLAY ONLY)
     |--------------------------------------------------------------------------
-    */
-        elseif (in_array($status, ['A', 'ALPA', 'ALPHA'], true)) {
+    */ elseif (in_array($status, ['A', 'ALPA', 'ALPHA'], true)) {
             $symbol = 'A';
         }
 
         /*
     |--------------------------------------------------------------------------
-    | JUMLAH CUTI/STATUS KHUSUS BERDASARKAN status_hari_final
+    | STATUS CUTI KHUSUS
     |--------------------------------------------------------------------------
-    */
-        elseif (in_array($status, $this->statusHariFinalCutiKeys, true)) {
+    */ elseif (in_array($status, $this->statusHariFinalCutiKeys, true)) {
             $symbol = $status;
             $row['stats'][$status]++;
         }
@@ -438,10 +462,10 @@ class RekapBulananService
 
         /*
     |--------------------------------------------------------------------------
-    | DEFAULT UNKNOWN STATUS
+    | DEFAULT STATUS
     |--------------------------------------------------------------------------
     */ else {
-            $symbol = $status;
+            $symbol = $status ?: '-';
         }
 
         /*
@@ -450,27 +474,36 @@ class RekapBulananService
     |--------------------------------------------------------------------------
     */
         $raw = $this->rawAbsensi($absen);
+
         $attrInNorm = strtolower(trim((string) ($absen->attribute_in ?? '')));
         $attrOutNorm = strtolower(trim((string) ($absen->attribute_out ?? '')));
-        $hasAdminAttr = in_array($attrInNorm, ['/adm', 'adm'], true)
-            || in_array($attrOutNorm, ['/adm', 'adm'], true);
+
+        $hasAdminAttr =
+            in_array($attrInNorm, ['/adm', 'adm'], true) ||
+            in_array($attrOutNorm, ['/adm', 'adm'], true);
+
         $forceWhiteCell = $hasAdminAttr && !in_array($status, ['HADIR', 'ALPA'], true);
 
         /*
     |--------------------------------------------------------------------------
     | COLOR LOGIC
     |--------------------------------------------------------------------------
-    | aturan:
-    | - tidak ada in & out → merah semua
-    | - salah satu kosong → yang kosong kuning
-    | - lengkap → putih semua
-    |--------------------------------------------------------------------------
     */
 
         $in  = $raw['time_in_final'] ?? null;
         $out = $raw['time_out_final'] ?? null;
 
-        if ($forceWhiteCell) {
+        /*
+|--------------------------------------------------------------------------
+| FORCE HOLIDAY WHITE CELL
+|--------------------------------------------------------------------------
+*/
+        if ($isHoliday) {
+
+            $colorIn  = 'bg-white';
+            $colorOut = 'bg-white';
+        } elseif ($forceWhiteCell) {
+
             $colorIn  = 'bg-white';
             $colorOut = 'bg-white';
         } elseif (!$in && !$out) {
@@ -489,7 +522,7 @@ class RekapBulananService
 
         /*
     |--------------------------------------------------------------------------
-    | FINAL CELL DATA
+    | FINAL CELL
     |--------------------------------------------------------------------------
     */
         $row['dates'][$tgl] = [

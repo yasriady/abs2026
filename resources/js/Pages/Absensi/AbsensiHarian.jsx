@@ -237,24 +237,27 @@ export default function AbsensiHarian({
 
                         <div className="col-md-3">
                             <label>&nbsp;</label>
-                            <button
-                                className="btn btn-primary btn-block"
-                                onClick={handleFilter}
-                            >
-                                Show
-                            </button>
-                            <button
-                                onClick={regenerateUnit}
-                                disabled={loadingUnit}
-                                className="px-3 py-2 bg-blue-600 text-white rounded"
-                                style={{ opacity: loadingUnit ? 0.6 : 1 }}
-                            >
-                                {loadingUnit ? "Processing..." : "Regenerate Absensi"}
-                            </button>
-
+                            <div style={{ display: 'flex', width: '100%' }}>
+                                <button
+                                    className="btn btn-primary"
+                                    onClick={handleFilter}
+                                    style={{ marginRight: '5px' }}
+                                >
+                                    Show
+                                </button>
+                                <button
+                                    onClick={regenerateUnit}
+                                    disabled={loadingUnit}
+                                    className="btn btn-info"
+                                    style={{
+                                        opacity: loadingUnit ? 0.6 : 1,
+                                        flex: 1
+                                    }}
+                                >
+                                    {loadingUnit ? "Processing..." : "Regenerate Absensi"}
+                                </button>
+                            </div>
                         </div>
-
-
 
 
                     </div>
@@ -314,7 +317,6 @@ export default function AbsensiHarian({
                                         </td>
                                     </tr>
                                 )}
-
                                 {pegawais.data.map((pegawai) => {
                                     const summary = pegawai.summary;
 
@@ -322,17 +324,33 @@ export default function AbsensiHarian({
                                         <tr key={pegawai.id}>
                                             {/* IDENTITY */}
                                             <td>
-                                                <strong>{pegawai.nama}</strong>
-                                                <br />
-                                                <small>NIK: {pegawai.nik}</small>
-                                                <br />
-                                                <small>NIP: {pegawai.nip}</small>
+                                                <div className="flex flex-col">
+                                                    <strong className="text-primary">{pegawai.nama}</strong>
+                                                    <div className="text-sm text-gray-600 mt-1">
+                                                        <div><span className="font-semibold">NIK:</span> {pegawai.nik}</div>
+                                                        <div><span className="font-semibold">NIP:</span> {pegawai.nip}</div>
+
+                                                        {/* Unit */}
+                                                        <div className="mt-2 pt-1 border-t border-gray-200">
+                                                            <div className="flex items-center gap-1 text-xs">
+                                                                <i className="fa fa-building-o text-blue-600"></i>
+                                                                <span className="font-medium">Unit:</span>
+                                                                <span className="text-gray-700">{pegawai.unit_name || '-'}</span>
+                                                            </div>
+
+                                                            {/* Sub Unit */}
+                                                            <div className="flex items-center gap-1 text-xs mt-1">
+                                                                <i className="fa fa-sitemap text-green-600"></i>
+                                                                <span className="font-medium">Sub Unit:</span>
+                                                                <span className="text-gray-700">{pegawai.sub_unit_name || '-'}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </td>
 
                                             {/* REF */}
                                             <td className="text-left">
-
-
                                                 <div style={{ position: 'relative', width: 55, height: 65 }}>
                                                     <a href={fotoUrl(pegawai.id)} data-lightbox="pegawai">
                                                         <img
@@ -366,16 +384,13 @@ export default function AbsensiHarian({
                                                             : "↻"
                                                         }
                                                     </button>
-
                                                 </div>
 
                                                 <div style={{ fontSize: 12, marginTop: 6 }}>
                                                     {filters.date}
                                                 </div>
 
-
                                                 {summary ? (
-
                                                     <span
                                                         style={{ cursor: "pointer" }}
                                                         onClick={() => {
@@ -394,16 +409,12 @@ export default function AbsensiHarian({
                                                         {summary.status_hari_final}
                                                     </span>
                                                 ) : (
-                                                    <span className="label label-default">
-                                                        -
-                                                    </span>
+                                                    <span className="label label-default">-</span>
                                                 )}
-
                                             </td>
 
                                             {/* MASUK */}
                                             <td className="text-left">
-
                                                 <a href={absensiFotoIn(summary)} data-lightbox="pegawai">
                                                     <img
                                                         src={absensiFotoIn(summary)}
@@ -414,7 +425,7 @@ export default function AbsensiHarian({
 
                                                 <div style={{ fontSize: 14, fontWeight: 600 }}>
                                                     {summary?.time_in_final
-                                                        ? summary.time_in_final.slice(0, -3)  // Menghapus detik (SS)
+                                                        ? summary.time_in_final.slice(0, -3)
                                                         : "-"}
                                                     {summary?.attribute_in && (
                                                         <span style={{ fontSize: 11, color: "#777", marginLeft: 4 }}>
@@ -427,9 +438,7 @@ export default function AbsensiHarian({
                                                     <span
                                                         onClick={() => summary && openJamModal(summary, "in")}
                                                         style={{ cursor: "pointer" }}
-                                                        className={`label ${summary?.status_masuk_final ===
-
-                                                            "HADIR"
+                                                        className={`label ${summary?.status_masuk_final === "HADIR"
                                                             ? "label-success"
                                                             : "label-danger"
                                                             }`}
@@ -447,12 +456,10 @@ export default function AbsensiHarian({
                                                         )}
                                                     </span>
                                                 </div>
-
                                             </td>
 
                                             {/* PULANG */}
                                             <td className="text-left">
-
                                                 <a href={absensiFotoOut(summary)} data-lightbox="pegawai">
                                                     <img
                                                         src={absensiFotoOut(summary)}
@@ -463,7 +470,7 @@ export default function AbsensiHarian({
 
                                                 <div style={{ fontSize: 14, fontWeight: 600 }}>
                                                     {summary?.time_out_final
-                                                        ? summary.time_out_final.slice(0, -3)  // Menghapus detik (SS)
+                                                        ? summary.time_out_final.slice(0, -3)
                                                         : "-"}
                                                     {summary?.attribute_out && (
                                                         <span style={{ fontSize: 11, color: "#777", marginLeft: 4 }}>
@@ -476,9 +483,7 @@ export default function AbsensiHarian({
                                                     <span
                                                         onClick={() => summary && openJamModal(summary, "out")}
                                                         style={{ cursor: "pointer" }}
-                                                        className={`label ${summary?.status_pulang_final ===
-
-                                                            "HADIR"
+                                                        className={`label ${summary?.status_pulang_final === "HADIR"
                                                             ? "label-success"
                                                             : "label-danger"
                                                             }`}
@@ -496,27 +501,25 @@ export default function AbsensiHarian({
                                                         )}
                                                     </span>
                                                 </div>
-
-
                                             </td>
 
                                             {/* KET */}
                                             <td>
-                                                {/* <div>
-                                                    {summary?.final_note || "-"}
-                                                </div> */}
-
                                                 {summary?.notes_hari && (
-                                                    <div>Hari: {summary.notes_hari}</div>
+                                                    <div className="text-sm">
+                                                        <span className="font-semibold">Hari:</span> {summary.notes_hari}
+                                                    </div>
                                                 )}
-
                                                 {summary?.notes_in && (
-                                                    <div>Pagi: {summary.notes_in}</div>
+                                                    <div className="text-sm">
+                                                        <span className="font-semibold">Pagi:</span> {summary.notes_in}
+                                                    </div>
                                                 )}
                                                 {summary?.notes_out && (
-                                                    <div>Sore: {summary.notes_out}</div>
+                                                    <div className="text-sm">
+                                                        <span className="font-semibold">Sore:</span> {summary.notes_out}
+                                                    </div>
                                                 )}
-
                                             </td>
                                         </tr>
                                     );
